@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import heroCharacter from "@/assets/hero-character.png";
 
 const teamMembers = [
   {
@@ -77,10 +78,13 @@ const About = () => {
               </div>
             </div>
             
-            <div className="bg-gradient-hero opacity-20 rounded-3xl h-96 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-white/50 text-lg">Our Story</div>
-              </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-hero opacity-20 rounded-full blur-3xl"></div>
+              <img 
+                src={heroCharacter} 
+                alt="3D Digital Character" 
+                className="relative z-10 w-full max-w-md mx-auto animate-float"
+              />
             </div>
           </div>
 
