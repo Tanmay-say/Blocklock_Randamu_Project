@@ -32,6 +32,8 @@ const ETHEREUM_SEPOLIA = {
 // Admin addresses (you can add more)
 const ADMIN_ADDRESSES = [
   '0x1234567890123456789012345678901234567890', // Replace with actual admin addresses
+  // Add your actual admin wallet address here
+  // For testing, you can temporarily add any address you want to test with
 ];
 
 // Seller addresses (you can add more)

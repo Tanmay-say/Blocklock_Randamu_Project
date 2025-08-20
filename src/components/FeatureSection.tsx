@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import nft1 from "@/assets/nft-1.png";
 import nft2 from "@/assets/nft-2.png";
 
 export const FeatureSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="px-6 py-20">
       <div className="max-w-7xl mx-auto">
@@ -36,8 +39,16 @@ export const FeatureSection = () => {
               laboris nisi ut aliquip ex ea commodo consequat.
             </p>
             
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3">
-              Join Free Discord
+            <Button 
+              onClick={() => {
+                console.log('Checkout features button clicked!');
+                navigate('/');
+                // Scroll to top of the page to show the action
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3"
+            >
+              Checkout features
             </Button>
           </div>
         </div>

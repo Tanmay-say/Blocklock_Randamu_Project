@@ -27,7 +27,7 @@ const teamMembers = [
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-dark">
       <Header />
       
       <main className="px-6 py-16">
@@ -35,7 +35,7 @@ const About = () => {
           {/* Hero Section */}
           <div className="text-center mb-20">
             <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
-              About <span className="text-primary">NFT ART</span>
+              About <span className="text-primary">Blockto NFT Mart</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               We're building the future of digital art ownership and creativity, 

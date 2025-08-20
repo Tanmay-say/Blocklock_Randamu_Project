@@ -13,7 +13,7 @@ export const CollectionsSection: React.FC = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
             Amazing and<br />
-            Super Unique Art<br />
+            Super <span className="text-primary">Unique Art</span><br />
             Collections
           </h2>
           

@@ -1,7 +1,21 @@
 import { Button } from "@/components/ui/button";
+import { useWallet } from "@/contexts/WalletContext";
+import { useNavigate } from "react-router-dom";
 import heroCharacter from "@/assets/hero-character.png";
 
 export const HeroSection = () => {
+  const { isConnected, connectWallet, account } = useWallet();
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    console.log('Button clicked, isConnected:', isConnected, 'account:', account);
+    if (isConnected) {
+      navigate('/about');
+    } else {
+      connectWallet();
+    }
+  };
+
   return (
     <section className="px-6 py-16 min-h-[80vh] flex items-center">
       <div className="max-w-7xl mx-auto w-full">
@@ -33,8 +47,11 @@ export const HeroSection = () => {
               </div>
             </div>
             
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-lg">
-              Join Free Discord
+            <Button 
+              onClick={handleButtonClick}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-lg"
+            >
+              {isConnected ? 'Explore with us' : 'Connect Wallet'}
             </Button>
           </div>
           
