@@ -1,0 +1,175 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MockRandamuVRF",
+  "sourceName": "contracts/MockRandamuVRF.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "randomness",
+          "type": "uint256"
+        }
+      ],
+      "name": "RandomnessFulfilled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "seed",
+          "type": "uint256"
+        }
+      ],
+      "name": "RandomnessRequested",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "randomness",
+          "type": "uint256"
+        }
+      ],
+      "name": "fulfillRandomness",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRandomness",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "randomness",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isRequestFulfilled",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "fulfilled",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "randomnessValues",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "requestFulfilled",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "seed",
+          "type": "uint256"
+        }
+      ],
+      "name": "requestRandomness",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "resetRequest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506103de806100206000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c806368064c641161005b57806368064c64146100ec5780637363ae1f1461011f5780638d2a188914610132578063ad44777b1461015257600080fd5b80630695a25214610082578063453f4f62146100975780635170c5f8146100bd575b600080fd5b61009561009036600461036d565b610175565b005b6100aa6100a536600461038f565b6101d1565b6040519081526020015b60405180910390f35b6100956100cb36600461038f565b600090815260208181526040808320805460ff191690556001909152812055565b61010f6100fa36600461038f565b60006020819052908152604090205460ff1681565b60405190151581526020016100b4565b6100aa61012d36600461038f565b61023e565b6100aa61014036600461038f565b60016020526000908152604090205481565b61010f61016036600461038f565b60009081526020819052604090205460ff1690565b600082815260208181526040808320805460ff19166001908117909155825291829020839055905182815283917f546aca7b2683440b8f02fa95faeb8efc79dd0f16af3d815a002742ea6f76116c910160405180910390a25050565b60008181526020819052604081205460ff1661022b5760405162461bcd60e51b815260206004820152601560248201527414995c5d595cdd081b9bdd08199d5b199a5b1b1959605a1b604482015260640160405180910390fd5b5060009081526001602052604090205490565b6040805142602082015290810182905233606090811b6bffffffffffffffffffffffff19169082015260009060740160408051601f198184030181529082905280516020909101209150829082907f3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a190600090a36102bc81836102c1565b919050565b604080516020810183905242918101919091524460608083019190915241901b6bffffffffffffffffffffffff1916608082015260009060940160408051601f1981840301815282825280516020918201206000878152808352838120805460ff1916600190811790915583529290922082905581835290925084917f546aca7b2683440b8f02fa95faeb8efc79dd0f16af3d815a002742ea6f76116c910160405180910390a2505050565b6000806040838503121561038057600080fd5b50508035926020909101359150565b6000602082840312156103a157600080fd5b503591905056fea26469706673582212205fbe24f9b0f94c770d5e507dd49f45a12311229265ea4597d7c6d6bb16443cfa64736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c806368064c641161005b57806368064c64146100ec5780637363ae1f1461011f5780638d2a188914610132578063ad44777b1461015257600080fd5b80630695a25214610082578063453f4f62146100975780635170c5f8146100bd575b600080fd5b61009561009036600461036d565b610175565b005b6100aa6100a536600461038f565b6101d1565b6040519081526020015b60405180910390f35b6100956100cb36600461038f565b600090815260208181526040808320805460ff191690556001909152812055565b61010f6100fa36600461038f565b60006020819052908152604090205460ff1681565b60405190151581526020016100b4565b6100aa61012d36600461038f565b61023e565b6100aa61014036600461038f565b60016020526000908152604090205481565b61010f61016036600461038f565b60009081526020819052604090205460ff1690565b600082815260208181526040808320805460ff19166001908117909155825291829020839055905182815283917f546aca7b2683440b8f02fa95faeb8efc79dd0f16af3d815a002742ea6f76116c910160405180910390a25050565b60008181526020819052604081205460ff1661022b5760405162461bcd60e51b815260206004820152601560248201527414995c5d595cdd081b9bdd08199d5b199a5b1b1959605a1b604482015260640160405180910390fd5b5060009081526001602052604090205490565b6040805142602082015290810182905233606090811b6bffffffffffffffffffffffff19169082015260009060740160408051601f198184030181529082905280516020909101209150829082907f3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a190600090a36102bc81836102c1565b919050565b604080516020810183905242918101919091524460608083019190915241901b6bffffffffffffffffffffffff1916608082015260009060940160408051601f1981840301815282825280516020918201206000878152808352838120805460ff1916600190811790915583529290922082905581835290925084917f546aca7b2683440b8f02fa95faeb8efc79dd0f16af3d815a002742ea6f76116c910160405180910390a2505050565b6000806040838503121561038057600080fd5b50508035926020909101359150565b6000602082840312156103a157600080fd5b503591905056fea26469706673582212205fbe24f9b0f94c770d5e507dd49f45a12311229265ea4597d7c6d6bb16443cfa64736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

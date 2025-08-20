@@ -1,0 +1,252 @@
+import React, { useState, useMemo } from 'react';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { NFTCard } from '@/components/NFTCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } from '@/data/nfts';
+import { Search, Filter, Grid3X3, List } from 'lucide-react';
+
+export const NFTs: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [collectionFilter, setCollectionFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Get unique collections and tags for filters
+  const collections = useMemo(() => {
+    const uniqueCollections = [...new Set(nfts.map(nft => nft.collection))];
+    return uniqueCollections;
+  }, []);
+
+  const tags = useMemo(() => {
+    const allTags = nfts.flatMap(nft => nft.tags);
+    const uniqueTags = [...new Set(allTags)];
+    return uniqueTags;
+  }, []);
+
+  // Filter NFTs based on search and filters
+  const filteredNFTs = useMemo(() => {
+    let filtered = nfts;
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(nft => nft.status === statusFilter);
+    }
+
+    // Collection filter
+    if (collectionFilter !== 'all') {
+      filtered = filtered.filter(nft => nft.collection === collectionFilter);
+    }
+
+    // Tag filter
+    if (tagFilter !== 'all') {
+      filtered = filtered.filter(nft => nft.tags.includes(tagFilter));
+    }
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(nft =>
+        nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nft.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nft.collection.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nft.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    return filtered;
+  }, [searchTerm, statusFilter, collectionFilter, tagFilter]);
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setCollectionFilter('all');
+    setTagFilter('all');
+  };
+
+  const getStatusCount = (status: string) => {
+    return nfts.filter(nft => nft.status === status).length;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-dark">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="px-6 py-20 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6">
+            NFT <span className="text-primary">Marketplace</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            Discover, collect, and bid on unique digital assets. Explore our curated collection of NFTs from talented artists and creators.
+          </p>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Filters and Search */}
+          <div className="bg-gradient-card rounded-2xl p-6 mb-8 shadow-nft border border-nft-border">
+            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search NFTs, collections, or tags..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-background/50 border-nft-border text-white placeholder:text-muted-foreground focus:border-primary"
+                />
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background/50'}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background/50'}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Filter Options */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="bg-background/50 border-nft-border text-white">
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-nft-border">
+                    <SelectItem value="all" className="text-white hover:bg-background/50">All Statuses</SelectItem>
+                    <SelectItem value="available" className="text-white hover:bg-background/50">Available ({getStatusCount('available')})</SelectItem>
+                    <SelectItem value="auction" className="text-white hover:bg-background/50">Auction ({getStatusCount('auction')})</SelectItem>
+                    <SelectItem value="sold" className="text-white hover:bg-background/50">Sold ({getStatusCount('sold')})</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Collection Filter */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Collection</label>
+                <Select value={collectionFilter} onValueChange={setCollectionFilter}>
+                  <SelectTrigger className="bg-background/50 border-nft-border text-white">
+                    <SelectValue placeholder="All Collections" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-nft-border">
+                    <SelectItem value="all" className="text-white hover:bg-background/50">All Collections</SelectItem>
+                    {collections.map((collection) => (
+                      <SelectItem key={collection} value={collection} className="text-white hover:bg-background/50">
+                        {collection}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Tag Filter */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Tag</label>
+                <Select value={tagFilter} onValueChange={setTagFilter}>
+                  <SelectTrigger className="bg-background/50 border-nft-border text-white">
+                    <SelectValue placeholder="All Tags" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-nft-border">
+                    <SelectItem value="all" className="text-white hover:bg-background/50">All Tags</SelectItem>
+                    {tags.map((tag) => (
+                      <SelectItem key={tag} value={tag} className="text-white hover:bg-background/50">
+                        {tag}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Clear Filters */}
+              <div className="flex items-end">
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="w-full border-nft-border text-muted-foreground hover:bg-background/50"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Results Summary */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground">
+                Showing {filteredNFTs.length} of {nfts.length} NFTs
+              </span>
+              {(statusFilter !== 'all' || collectionFilter !== 'all' || tagFilter !== 'all' || searchTerm) && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Filters:</span>
+                  {statusFilter !== 'all' && (
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border border-primary/30">{statusFilter}</Badge>
+                  )}
+                  {collectionFilter !== 'all' && (
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border border-primary/30">{collectionFilter}</Badge>
+                  )}
+                  {tagFilter !== 'all' && (
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border border-primary/30">{tagFilter}</Badge>
+                  )}
+                  {searchTerm && (
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border border-primary/30">"{searchTerm}"</Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* NFT Grid */}
+          {filteredNFTs.length > 0 ? (
+            <div className={
+              viewMode === 'grid' 
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
+                : 'space-y-4'
+            }>
+              {filteredNFTs.map((nft) => (
+                <NFTCard key={nft.id} nft={nft} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground mb-4">
+                <Search className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">No NFTs found</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search terms or filters to find what you're looking for.
+              </p>
+              <Button onClick={clearFilters} variant="outline" className="border-nft-border text-muted-foreground hover:bg-background/50">
+                Clear all filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};

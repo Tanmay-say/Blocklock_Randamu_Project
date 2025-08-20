@@ -1,48 +1,125 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { Link, useLocation } from "react-router-dom";
+import { useWallet } from "@/contexts/WalletContext";
+import { Wallet, Settings, Bot, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Header = () => {
   const location = useLocation();
+  const { account, isConnected, isAdmin, connectWallet, disconnectWallet } = useWallet();
   
   const isActive = (path: string) => location.pathname === path;
   
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+  
   return (
-    <header className="w-full px-6 py-4 flex items-center justify-between">
+    <header className="w-full px-6 py-6 flex items-center justify-between">
       <Link to="/">
         <Logo />
       </Link>
       
-      <nav className="hidden md:flex items-center gap-8">
-        <Link 
-          to="/features" 
-          className={`transition-colors ${isActive('/features') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-        >
-          Features
-        </Link>
-        <Link 
-          to="/about" 
-          className={`transition-colors ${isActive('/about') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-        >
-          About
-        </Link>
-        <Link 
-          to="/collections" 
-          className={`transition-colors ${isActive('/collections') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-        >
-          Collections
-        </Link>
-        <Link 
-          to="/contact" 
-          className={`transition-colors ${isActive('/contact') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-        >
-          Contact
-        </Link>
-      </nav>
+              <nav className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/" 
+            className={`transition-colors text-lg ${isActive('/') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            Home
+          </Link>
+          <Link 
+            to="/nfts" 
+            className={`transition-colors text-lg ${isActive('/nfts') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            NFTs
+          </Link>
+          <Link 
+            to="/features" 
+            className={`transition-colors text-lg ${isActive('/features') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            Features
+          </Link>
+          <Link 
+            to="/about" 
+            className={`transition-colors text-lg ${isActive('/about') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            About
+          </Link>
+          <Link 
+            to="/contact" 
+            className={`transition-colors text-lg ${isActive('/contact') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            Contact
+          </Link>
+          
+          {/* GenAI Option for all users */}
+          <Link 
+            to="/genai" 
+            className={`transition-colors flex items-center gap-2 text-lg ${isActive('/genai') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            <Bot className="w-5 h-5" />
+            GenAI
+          </Link>
+          
+          {/* Admin Panel - only visible to admins */}
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className={`transition-colors flex items-center gap-2 text-lg ${isActive('/admin') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+            >
+              <Settings className="w-5 h-5" />
+              Admin
+            </Link>
+          )}
+        </nav>
       
-      <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-        Join With Us
-      </Button>
+      <div className="flex items-center gap-4">
+        {isConnected ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Wallet className="w-4 h-4 mr-2" />
+                {formatAddress(account!)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem className="cursor-pointer">
+                <Wallet className="w-4 h-4 mr-2" />
+                {account}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {isAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="cursor-pointer">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Admin Panel
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={disconnectWallet} className="cursor-pointer text-red-600">
+                <LogOut className="w-4 h-4 mr-2" />
+                Disconnect
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button 
+            onClick={connectWallet}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            Connect Wallet
+          </Button>
+        )}
+      </div>
     </header>
   );
 };
