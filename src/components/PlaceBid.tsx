@@ -31,12 +31,18 @@ export const PlaceBid: React.FC = () => {
       const nftData = getNFTById(id);
       if (nftData) {
         setNft(nftData);
-        // Set minimum bid amount (base price + 10%)
-        const minBid = nftData.price * 1.1;
-        setBidAmount(minBid.toFixed(4));
+        
+        // Validate NFT is available for bidding
+        if (nftData.status !== 'auction') {
+          setError(`This NFT is not available for bidding. Status: ${nftData.status}`);
+          return;
+        }
+        
+        // Set minimum bid amount (base price)
+        setBidAmount(nftData.price.toFixed(4));
       }
     }
-  }, [id]);
+  }, [id, getNFTById]);
 
   useEffect(() => {
     if (nft?.auctionEndTime) {

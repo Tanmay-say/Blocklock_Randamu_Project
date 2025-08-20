@@ -463,49 +463,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <div className="text-blue-400">Auction: {nfts.filter(n => n.status === 'auction').length}</div>
                 <div className="text-gray-400">Sold: {nfts.filter(n => n.status === 'sold').length}</div>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => {
-                    const testNFT: NFT = {
-                      id: Date.now().toString(),
-                      name: "Test NFT " + Date.now(),
-                      description: "This is a test NFT",
-                      image: "/src/assets/nft-1.png",
-                      price: 0.001,
-                      tags: ["Test"],
-                      creator: account || "0x0000000000000000000000000000000000000000",
-                      collection: "Test Collection",
-                      mintDate: new Date().toISOString().split('T')[0],
-                      attributes: [],
-                      status: 'available',
-                      currentBids: 0
-                    };
-                    addNFT(testNFT);
-                    toast({
-                      title: "Test NFT Added",
-                      description: "Check if it appears on the website",
-                    });
-                  }}
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  🧪 Add Test NFT
-                </Button>
-                <Button 
-                  onClick={() => {
-                    resetNFTs();
-                    toast({
-                      title: "NFTs Reset",
-                      description: "Reset to original 6 NFTs",
-                    });
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="border-red-500 text-red-400 hover:bg-red-500/20"
-                >
-                  🔄 Reset NFTs
-                </Button>
-              </div>
+
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

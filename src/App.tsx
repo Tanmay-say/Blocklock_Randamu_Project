@@ -16,6 +16,7 @@ import { GenAI } from "./pages/GenAI";
 import NotFound from "./pages/NotFound";
 import { NFTs } from "./pages/NFTs";
 import { PlaceBid } from "./components/PlaceBid";
+import { BuyNFT } from "./components/BuyNFT";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/genai" element={<GenAI />} />
                 <Route path="/nfts" element={<NFTs />} />
                 <Route path="/place-bid/:id" element={<PlaceBid />} />
+                <Route path="/buy/:id" element={<BuyNFT />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

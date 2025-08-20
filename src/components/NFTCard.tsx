@@ -23,6 +23,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
     navigate(`/place-bid/${nft.id}`);
   };
 
+  const handleBuyNow = () => {
+    if (!isConnected) {
+      // Show wallet connection prompt
+      return;
+    }
+    // Navigate to buy page or handle direct purchase
+    navigate(`/buy/${nft.id}`);
+  };
+
   const formatPrice = (price: number) => {
     return `${price} ETH`;
   };
@@ -110,15 +119,40 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
         </div>
         
         {showBidButton && (
-          <Button 
-            onClick={handlePlaceBid}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            variant={nft.status === 'auction' ? 'default' : 'outline'}
-            disabled={nft.status === 'sold'}
-          >
-            {nft.status === 'auction' ? 'Place Bid' : 
-             nft.status === 'available' ? 'Buy Now' : 'Sold'}
-          </Button>
+          <>
+            {/* Available NFTs - Direct Buy Button */}
+            {nft.status === 'available' && (
+              <Button 
+                onClick={handleBuyNow}
+                className="w-full bg-green-600 text-white hover:bg-green-700"
+                variant="default"
+              >
+                Buy Now - {formatPrice(nft.price)}
+              </Button>
+            )}
+
+            {/* Auction NFTs - Place Bid Button */}
+            {nft.status === 'auction' && (
+              <Button 
+                onClick={handlePlaceBid}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                variant="default"
+              >
+                Place Bid (Min: {formatPrice(nft.price)})
+              </Button>
+            )}
+
+            {/* Sold NFTs - Disabled Display Only */}
+            {nft.status === 'sold' && (
+              <Button 
+                className="w-full bg-gray-600 text-gray-300 cursor-not-allowed"
+                variant="outline"
+                disabled
+              >
+                Sold Out
+              </Button>
+            )}
+          </>
         )}
       </div>
     </Card>

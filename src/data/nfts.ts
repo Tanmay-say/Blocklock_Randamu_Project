@@ -22,6 +22,7 @@ export interface NFT {
   auctionEndTime?: string;
   currentBids?: number;
   status: 'available' | 'auction' | 'sold';
+  owner?: string; // Current owner address (for sold NFTs)
 }
 
 export const nfts: NFT[] = [
