@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { NFT } from '@/data/nfts';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '@/contexts/WalletContext';
+import { useNFT } from '@/contexts/NFTContext';
+import { AuctionCountdown } from './AuctionCountdown';
 
 interface NFTCardProps {
   nft: NFT;
@@ -13,7 +15,8 @@ interface NFTCardProps {
 
 export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) => {
   const navigate = useNavigate();
-  const { isConnected } = useWallet();
+  const { isConnected, account } = useWallet();
+  const { hasUserBidOnNFT } = useNFT();
 
   const handlePlaceBid = () => {
     if (!isConnected) {
@@ -53,6 +56,12 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
     }
   };
 
+  // Check if current user has already bid on this NFT
+  const userHasBid = account ? hasUserBidOnNFT(nft.id, account) : false;
+  
+  // Check if current user is the highest bidder
+  const isHighestBidder = account && nft.highestBid && nft.highestBid.bidder.toLowerCase() === account.toLowerCase();
+
   return (
     <Card className="bg-gradient-card rounded-2xl p-4 shadow-nft hover:shadow-glow transition-all duration-300 group border-nft-border overflow-hidden">
       <div className="relative mb-4">
@@ -66,13 +75,20 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
             {nft.status.charAt(0).toUpperCase() + nft.status.slice(1)}
           </Badge>
         </div>
-        {nft.status === 'auction' && nft.currentBids && (
-          <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border border-orange-500/30">
-              {nft.currentBids} bids
-            </Badge>
-          </div>
-        )}
+                            {nft.status === 'auction' && nft.currentBids && (
+                      <div className="absolute top-3 left-3">
+                        <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                          {nft.currentBids} bids
+                        </Badge>
+                      </div>
+                    )}
+                    {isHighestBidder && (
+                      <div className="absolute top-3 left-3 mt-8">
+                        <Badge className="bg-green-900/20 text-green-400 border border-green-700/30">
+                          Your Leading Bid
+                        </Badge>
+                      </div>
+                    )}
         <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/70 rounded-lg backdrop-blur-sm">
           <span className="text-white text-sm font-semibold">{formatPrice(nft.price)}</span>
         </div>
@@ -96,11 +112,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
           </div>
           
           {nft.status === 'auction' && nft.auctionEndTime && (
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Auction Ends:</span>
-              <span className="text-sm text-red-400 font-medium">
-                {formatDate(nft.auctionEndTime)}
-              </span>
+            <div className="space-y-2">
+              <AuctionCountdown 
+                endTime={nft.auctionEndTime} 
+                compact={true}
+                className="justify-between"
+              />
+              <div className="text-xs text-muted-foreground">
+                Ends: {formatDate(nft.auctionEndTime)}
+              </div>
             </div>
           )}
         </div>
@@ -131,16 +151,30 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
               </Button>
             )}
 
-            {/* Auction NFTs - Place Bid Button */}
-            {nft.status === 'auction' && (
-              <Button 
-                onClick={handlePlaceBid}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                variant="default"
-              >
-                Place Bid (Min: {formatPrice(nft.price)})
-              </Button>
-            )}
+                                    {/* Auction NFTs - Place Bid Button */}
+                        {nft.status === 'auction' && (
+                          userHasBid ? (
+                            <Button 
+                              className={`w-full cursor-not-allowed ${
+                                isHighestBidder 
+                                  ? 'bg-green-600 text-white' 
+                                  : 'bg-orange-600 text-white'
+                              }`}
+                              variant="outline"
+                              disabled
+                            >
+                              {isHighestBidder ? 'Leading Bid' : 'Already Bid'}
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={handlePlaceBid}
+                              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                              variant="default"
+                            >
+                              Place Bid (Min: {formatPrice(nft.price)})
+                            </Button>
+                          )
+                        )}
 
             {/* Sold NFTs - Disabled Display Only */}
             {nft.status === 'sold' && (

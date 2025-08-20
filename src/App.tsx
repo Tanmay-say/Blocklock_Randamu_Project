@@ -13,6 +13,7 @@ import Collections from "./pages/Collections";
 import Contact from "./pages/Contact";
 import { Admin } from "./pages/Admin";
 import { GenAI } from "./pages/GenAI";
+import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { NFTs } from "./pages/NFTs";
 import { PlaceBid } from "./components/PlaceBid";
@@ -35,11 +36,12 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/collections" element={<Collections />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/genai" element={<GenAI />} />
-                <Route path="/nfts" element={<NFTs />} />
-                <Route path="/place-bid/:id" element={<PlaceBid />} />
-                <Route path="/buy/:id" element={<BuyNFT />} />
+                            <Route path="/admin" element={<Admin />} />
+            <Route path="/genai" element={<GenAI />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/nfts" element={<NFTs />} />
+            <Route path="/place-bid/:id" element={<PlaceBid />} />
+            <Route path="/buy/:id" element={<BuyNFT />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

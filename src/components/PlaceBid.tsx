@@ -11,20 +11,21 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from '@/contexts/WalletContext';
 import { useNFT } from '@/contexts/NFTContext';
+import { AuctionCountdown } from './AuctionCountdown';
 import { ArrowLeft, Clock, Users, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const PlaceBid: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isConnected, account, signer } = useWallet();
-  const { getNFTById } = useNFT();
+  const { getNFTById, placeBid, hasUserBidOnNFT } = useNFT();
   
   const [nft, setNft] = useState<any>(null);
   const [bidAmount, setBidAmount] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
-  const [timeLeft, setTimeLeft] = useState<string>('');
+
 
   useEffect(() => {
     if (id) {
@@ -44,36 +45,7 @@ export const PlaceBid: React.FC = () => {
     }
   }, [id, getNFTById]);
 
-  useEffect(() => {
-    if (nft?.auctionEndTime) {
-      const timer = setInterval(() => {
-        const now = new Date().getTime();
-        const endTime = new Date(nft.auctionEndTime).getTime();
-        const difference = endTime - now;
 
-        if (difference > 0) {
-          const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-          if (days > 0) {
-            setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-          } else if (hours > 0) {
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-          } else if (minutes > 0) {
-            setTimeLeft(`${minutes}m ${seconds}s`);
-          } else {
-            setTimeLeft(`${seconds}s`);
-          }
-        } else {
-          setTimeLeft('Auction ended');
-        }
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [nft?.auctionEndTime]);
 
   if (!nft) {
     return (
@@ -99,6 +71,17 @@ export const PlaceBid: React.FC = () => {
       return;
     }
 
+    if (!account) {
+      setError('Wallet account not found');
+      return;
+    }
+
+    // Check if user has already bid on this NFT
+    if (hasUserBidOnNFT(nft.id, account)) {
+      setError('You have already placed a bid on this NFT. Multiple bids from the same user are not allowed.');
+      return;
+    }
+
     if (!bidAmount || parseFloat(bidAmount) <= 0) {
       setError('Please enter a valid bid amount');
       return;
@@ -121,10 +104,22 @@ export const PlaceBid: React.FC = () => {
       // Simulate blockchain transaction
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setSuccess('Bid placed successfully! Your bid has been recorded on the blockchain.');
+      // Simulate transaction hash
+      const mockTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
       
-      // Reset form
-      setBidAmount((bidValue * 1.1).toFixed(4));
+      // Place the bid in our system
+      placeBid(nft.id, account!, bidValue, mockTxHash);
+      
+      // Update local NFT data
+      const updatedNFT = getNFTById(nft.id);
+      if (updatedNFT) {
+        setNft(updatedNFT);
+      }
+      
+      setSuccess(`Bid of ${bidValue} ETH placed successfully! Transaction: ${mockTxHash.slice(0, 10)}...`);
+      
+      // Reset form to next increment
+      setBidAmount((bidValue * 1.05).toFixed(4)); // 5% increment for next bid
       
       // In a real implementation, you would:
       // 1. Call the smart contract's commitBid function
@@ -216,12 +211,14 @@ export const PlaceBid: React.FC = () => {
                           </span>
                         </div>
                         
-                        {timeLeft && (
-                          <div className="flex items-center gap-2 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                            <Clock className="w-4 h-4 text-orange-400" />
-                            <span className="text-sm font-medium text-orange-300">
-                              Time left: {timeLeft}
-                            </span>
+                        {nft.auctionEndTime && (
+                          <div className="p-4 bg-gradient-card/50 rounded-lg border border-nft-border">
+                            <AuctionCountdown 
+                              endTime={nft.auctionEndTime}
+                              onExpired={() => {
+                                setError('This auction has ended. You can no longer place bids.');
+                              }}
+                            />
                           </div>
                         )}
                       </>
@@ -264,6 +261,20 @@ export const PlaceBid: React.FC = () => {
                       <AlertCircle className="h-4 w-4 text-primary" />
                       <AlertDescription className="text-primary">
                         Please connect your wallet to place a bid
+                      </AlertDescription>
+                    </Alert>
+                  ) : account && hasUserBidOnNFT(nft.id, account) ? (
+                    <Alert className="bg-orange-500/10 border-orange-500/20">
+                      <AlertCircle className="h-4 w-4 text-orange-400" />
+                      <AlertDescription className="text-orange-300">
+                        You have already placed a bid on this NFT. Multiple bids from the same user are not allowed.
+                        You can view your bid in your <Button 
+                          variant="link" 
+                          className="p-0 h-auto text-orange-400 underline"
+                          onClick={() => navigate('/profile')}
+                        >
+                          profile
+                        </Button>.
                       </AlertDescription>
                     </Alert>
                   ) : (

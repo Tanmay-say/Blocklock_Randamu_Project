@@ -5,6 +5,15 @@ import nft4 from '@/assets/nft-4.png';
 import nft5 from '@/assets/nft-5.png';
 import nft6 from '@/assets/nft-6.png';
 
+export interface Bid {
+  id: string;
+  nftId: string;
+  bidder: string; // Wallet address
+  amount: number; // Bid amount in ETH
+  timestamp: string;
+  transactionHash?: string;
+}
+
 export interface NFT {
   id: string;
   name: string;
@@ -23,6 +32,9 @@ export interface NFT {
   currentBids?: number;
   status: 'available' | 'auction' | 'sold';
   owner?: string; // Current owner address (for sold NFTs)
+  bids?: Bid[]; // Array of bids for auction NFTs
+  highestBid?: Bid; // Current highest bid
+  winner?: string; // Winner address when auction ends
 }
 
 export const nfts: NFT[] = [

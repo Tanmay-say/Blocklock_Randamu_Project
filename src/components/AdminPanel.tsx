@@ -12,6 +12,7 @@ import { useNFT } from "@/contexts/NFTContext";
 import { Plus, Edit, Trash2, Eye, Trophy, Users, Clock, DollarSign, Image, Tag, Settings, Wallet, Coins } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { NFT } from '@/data/nfts';
+import { AdminBidManagement } from './AdminBidManagement';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -46,7 +47,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     nftId: '',
     startingPrice: '',
     reservePrice: '',
-    duration: '24', // hours
+    duration: '24', // duration value
+    durationUnit: 'hours', // minutes, hours, days
     startTime: new Date().toISOString().slice(0, 16), // Set default to current time
     description: '',
     creator: ''
@@ -230,6 +232,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       startingPrice: nft.price.toString(),
       reservePrice: (nft.price * 1.2).toString(), // 20% higher than base price
       duration: '24',
+      durationUnit: 'hours',
       startTime: new Date().toISOString().slice(0, 16),
       description: `Auction for ${nft.name}`,
       creator: nft.creator
@@ -339,11 +342,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         return;
       }
 
+      // Calculate auction end time based on duration and unit
+      const calculateAuctionEndTime = () => {
+        const duration = parseInt(auctionForm.duration);
+        const now = Date.now();
+        let milliseconds = 0;
+
+        switch (auctionForm.durationUnit) {
+          case 'minutes':
+            milliseconds = duration * 60 * 1000;
+            break;
+          case 'hours':
+            milliseconds = duration * 60 * 60 * 1000;
+            break;
+          case 'days':
+            milliseconds = duration * 24 * 60 * 60 * 1000;
+            break;
+          default:
+            milliseconds = duration * 60 * 60 * 1000; // Default to hours
+        }
+
+        return new Date(now + milliseconds).toISOString();
+      };
+
       // Update NFT status to auction
       updateNFT(auctionForm.nftId, {
         status: 'auction' as const,
         price: parseFloat(auctionForm.startingPrice),
-        auctionEndTime: new Date(Date.now() + parseInt(auctionForm.duration) * 60 * 60 * 1000).toISOString(),
+        auctionEndTime: calculateAuctionEndTime(),
         currentBids: 0
       });
       
@@ -358,6 +384,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         startingPrice: '',
         reservePrice: '',
         duration: '24',
+        durationUnit: 'hours',
         startTime: new Date().toISOString().slice(0, 16),
         description: '',
         creator: ''
@@ -382,6 +409,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       startingPrice: '',
       reservePrice: '',
       duration: '24',
+      durationUnit: 'hours',
       startTime: new Date().toISOString().slice(0, 16),
       description: '',
       creator: ''
@@ -434,7 +462,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gradient-card border border-nft-border">
+          <TabsList className="grid w-full grid-cols-6 bg-gradient-card border border-nft-border">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Overview
             </TabsTrigger>
@@ -446,6 +474,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             </TabsTrigger>
             <TabsTrigger value="auctions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Auctions
+            </TabsTrigger>
+            <TabsTrigger value="bids" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Bid Management
             </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Settings
@@ -774,20 +805,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                        </div>
 
                        <div>
-                         <Label htmlFor="duration" className="text-muted-foreground">Duration (hours)</Label>
-                         <Select value={auctionForm.duration} onValueChange={(value) => handleAuctionInputChange('duration', value)}>
-                           <SelectTrigger className="bg-background border-nft-border text-foreground">
-                             <SelectValue />
-                           </SelectTrigger>
-                           <SelectContent className="bg-background border-nft-border">
-                             <SelectItem value="1">1 hour</SelectItem>
-                             <SelectItem value="6">6 hours</SelectItem>
-                             <SelectItem value="12">12 hours</SelectItem>
-                             <SelectItem value="24">24 hours</SelectItem>
-                             <SelectItem value="48">48 hours</SelectItem>
-                             <SelectItem value="72">72 hours</SelectItem>
-                           </SelectContent>
-                         </Select>
+                         <Label htmlFor="duration" className="text-muted-foreground">Auction Duration</Label>
+                         <div className="grid grid-cols-2 gap-2">
+                           <Input
+                             id="duration"
+                             type="number"
+                             min="1"
+                             value={auctionForm.duration}
+                             onChange={(e) => handleAuctionInputChange('duration', e.target.value)}
+                             placeholder="24"
+                             className="bg-background border-nft-border text-foreground"
+                             required
+                           />
+                           <Select value={auctionForm.durationUnit} onValueChange={(value) => handleAuctionInputChange('durationUnit', value)}>
+                             <SelectTrigger className="bg-background border-nft-border text-foreground">
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent className="bg-background border-nft-border">
+                               <SelectItem value="minutes">Minutes</SelectItem>
+                               <SelectItem value="hours">Hours</SelectItem>
+                               <SelectItem value="days">Days</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         <p className="text-xs text-muted-foreground mt-1">
+                           {auctionForm.duration && auctionForm.durationUnit && 
+                             `Auction will run for ${auctionForm.duration} ${auctionForm.durationUnit}`}
+                         </p>
                        </div>
 
                        <div>
@@ -1247,6 +1291,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                </CardContent>
              </Card>
            </TabsContent>
+
+          {/* Bid Management Tab */}
+          <TabsContent value="bids" className="space-y-6">
+            <AdminBidManagement />
+          </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">

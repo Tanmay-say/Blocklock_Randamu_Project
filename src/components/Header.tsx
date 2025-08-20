@@ -3,7 +3,7 @@ import { Logo } from "@/components/ui/logo";
 import { Link, useLocation } from "react-router-dom";
 import { useWallet } from "@/contexts/WalletContext";
 import { useAdmin } from "@/contexts/AdminContext";
-import { Wallet, Settings, Bot, LogOut } from "lucide-react";
+import { Wallet, Settings, Bot, LogOut, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,17 @@ export const Header = () => {
             <Bot className="w-5 h-5" />
             GenAI
           </Link>
+          
+          {/* Profile - only visible to connected users */}
+          {isConnected && (
+            <Link 
+              to="/profile" 
+              className={`transition-colors flex items-center gap-2 text-lg ${isActive('/profile') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+            >
+              <User className="w-5 h-5" />
+              Profile
+            </Link>
+          )}
           
           {/* Admin Panel - only visible to authenticated admins */}
           {isAdminAuthenticated && (
