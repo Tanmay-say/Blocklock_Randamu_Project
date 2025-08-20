@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { NFTProvider } from "@/contexts/NFTContext";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import About from "./pages/About";
@@ -22,25 +23,27 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <WalletProvider>
       <AdminProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/collections" element={<Collections />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/genai" element={<GenAI />} />
-              <Route path="/nfts" element={<NFTs />} />
-              <Route path="/place-bid/:id" element={<PlaceBid />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <NFTProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/collections" element={<Collections />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/genai" element={<GenAI />} />
+                <Route path="/nfts" element={<NFTs />} />
+                <Route path="/place-bid/:id" element={<PlaceBid />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </NFTProvider>
       </AdminProvider>
     </WalletProvider>
   </QueryClientProvider>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWallet } from "@/contexts/WalletContext";
+import { useNFT } from "@/contexts/NFTContext";
 import { Plus, Edit, Trash2, Eye, Trophy, Users, Clock, DollarSign, Image, Tag, Settings, Wallet, Coins } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { NFT } from '@/data/nfts';
@@ -18,7 +19,7 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const { account, isConnected, provider, chainId } = useWallet();
-  const [nfts, setNfts] = useState<NFT[]>([]);
+  const { nfts, addNFT, updateNFT, deleteNFT, getNFTsByStatus, resetNFTs } = useNFT();
   const [loading, setLoading] = useState(false);
   const [walletBalance, setWalletBalance] = useState<string>('0');
   const [networkName, setNetworkName] = useState<string>('Unknown');
@@ -55,10 +56,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  
+  // Filter state for admin view
+  const [nftFilter, setNftFilter] = useState<'all' | 'available' | 'auction' | 'sold'>('all');
+
+  // Filtered NFTs for display
+  const filteredNFTs = nftFilter === 'all' ? nfts : getNFTsByStatus(nftFilter);
 
   // Load NFTs and wallet info on component mount
   useEffect(() => {
-    loadNFTs();
     if (isConnected && provider) {
       loadWalletInfo();
     }
@@ -93,47 +99,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     }
   };
 
-  const loadNFTs = () => {
-    // In a real app, this would fetch from your backend
-    // For now, we'll use mock data
-    const mockNFTs: NFT[] = [
-      {
-        id: "1",
-        name: "Cosmic Wanderer #001",
-        description: "A mysterious traveler from the depths of space",
-        image: "/src/assets/nft-1.png",
-        price: 0.005,
-        tags: ["Space", "Cosmic", "Mystical"],
-        creator: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
-        collection: "Cosmic Collection",
-        mintDate: "2024-01-15",
-        attributes: [
-          { trait_type: "Background", value: "Nebula" },
-          { trait_type: "Rarity", value: "Legendary" }
-        ],
-        status: 'available',
-        currentBids: 0
-      },
-      {
-        id: "2",
-        name: "Tanmay's new1",
-        description: "abc",
-        image: "/src/assets/nft-2.png",
-        price: 0.0001,
-        tags: ["Art", "Digital"],
-        creator: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
-        collection: "Tanmay Collection",
-        mintDate: "2024-01-20",
-        attributes: [
-          { trait_type: "Style", value: "Abstract" },
-          { trait_type: "Rarity", value: "Common" }
-        ],
-        status: 'available',
-        currentBids: 0
-      }
-    ];
-    setNfts(mockNFTs);
-  };
+
 
   const resetForm = () => {
     setNftForm({
@@ -174,23 +140,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
       if (editingNFT) {
         // Update existing NFT
-        const updatedNFTs = nfts.map(nft => 
-          nft.id === editingNFT.id 
-            ? { 
-                ...nft, 
-                name: nftForm.name,
-                description: nftForm.description,
-                price: parseFloat(nftForm.price),
-                collection: nftForm.collection,
-                tags: nftForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-                image: nftForm.image || imagePreview || nft.image,
-                creator: nftForm.creator,
-                mintDate: nftForm.mintDate,
-                status: nftForm.status
-              }
-            : nft
-        );
-        setNfts(updatedNFTs);
+        const updatedData = {
+          name: nftForm.name,
+          description: nftForm.description,
+          price: parseFloat(nftForm.price),
+          collection: nftForm.collection,
+          tags: nftForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          image: nftForm.image || imagePreview || editingNFT.image,
+          creator: nftForm.creator,
+          mintDate: nftForm.mintDate,
+          status: nftForm.status
+        };
+        
+        updateNFT(editingNFT.id, updatedData);
         toast({
           title: "NFT Updated",
           description: "The NFT has been successfully updated.",
@@ -213,7 +175,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         };
         
         console.log('Adding new NFT:', newNFT);
-        setNfts(prevNfts => [...prevNfts, newNFT]);
+        addNFT(newNFT);
         toast({
           title: "NFT Added",
           description: "New NFT has been successfully added to the marketplace.",
@@ -253,13 +215,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
   const handleDelete = async (nftId: string) => {
     if (window.confirm('Are you sure you want to delete this NFT?')) {
-      const updatedNFTs = nfts.filter(nft => nft.id !== nftId);
-      setNfts(updatedNFTs);
+      deleteNFT(nftId);
       toast({
         title: "NFT Deleted",
         description: "The NFT has been successfully removed.",
       });
     }
+  };
+
+  const handleConvertToAuction = (nft: NFT) => {
+    // Pre-fill the auction form with the selected NFT
+    setAuctionForm({
+      nftId: nft.id,
+      startingPrice: nft.price.toString(),
+      reservePrice: (nft.price * 1.2).toString(), // 20% higher than base price
+      duration: '24',
+      startTime: new Date().toISOString().slice(0, 16),
+      description: `Auction for ${nft.name}`,
+      creator: nft.creator
+    });
+    setIsCreatingAuction(true);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -365,19 +340,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       }
 
       // Update NFT status to auction
-      const updatedNFTs = nfts.map(nft => 
-        nft.id === auctionForm.nftId 
-          ? { 
-              ...nft, 
-              status: 'auction' as const,
-              price: parseFloat(auctionForm.startingPrice),
-              auctionEndTime: new Date(Date.now() + parseInt(auctionForm.duration) * 60 * 60 * 1000).toISOString(),
-              currentBids: 0
-            }
-          : nft
-      );
-      
-      setNfts(updatedNFTs);
+      updateNFT(auctionForm.nftId, {
+        status: 'auction' as const,
+        price: parseFloat(auctionForm.startingPrice),
+        auctionEndTime: new Date(Date.now() + parseInt(auctionForm.duration) * 60 * 60 * 1000).toISOString(),
+        currentBids: 0
+      });
       
       toast({
         title: "Auction Created",
@@ -486,6 +454,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Debug Info */}
+            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 mb-6">
+              <h3 className="text-white font-medium mb-2">🔍 Debug Info</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                <div className="text-yellow-400">Total: {nfts.length}</div>
+                <div className="text-green-400">Available: {nfts.filter(n => n.status === 'available').length}</div>
+                <div className="text-blue-400">Auction: {nfts.filter(n => n.status === 'auction').length}</div>
+                <div className="text-gray-400">Sold: {nfts.filter(n => n.status === 'sold').length}</div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    const testNFT: NFT = {
+                      id: Date.now().toString(),
+                      name: "Test NFT " + Date.now(),
+                      description: "This is a test NFT",
+                      image: "/src/assets/nft-1.png",
+                      price: 0.001,
+                      tags: ["Test"],
+                      creator: account || "0x0000000000000000000000000000000000000000",
+                      collection: "Test Collection",
+                      mintDate: new Date().toISOString().split('T')[0],
+                      attributes: [],
+                      status: 'available',
+                      currentBids: 0
+                    };
+                    addNFT(testNFT);
+                    toast({
+                      title: "Test NFT Added",
+                      description: "Check if it appears on the website",
+                    });
+                  }}
+                  size="sm"
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  🧪 Add Test NFT
+                </Button>
+                <Button 
+                  onClick={() => {
+                    resetNFTs();
+                    toast({
+                      title: "NFTs Reset",
+                      description: "Reset to original 6 NFTs",
+                    });
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="border-red-500 text-red-400 hover:bg-red-500/20"
+                >
+                  🔄 Reset NFTs
+                </Button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card className="bg-gradient-card border border-nft-border">
                 <CardContent className="p-6">
@@ -552,14 +574,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
                          <div className="flex items-center justify-between">
                <h3 className="text-xl font-semibold text-white">Recent Activity</h3>
-               <Button 
-                 onClick={() => setIsCreatingAuction(true)} 
-                 size="sm"
-                 className="bg-green-600 hover:bg-green-700"
-               >
-                 <Trophy className="w-4 h-4 mr-2" />
-                 Quick Auction
-               </Button>
+
              </div>
              <Card className="bg-gradient-card border border-nft-border">
                <CardContent>
@@ -690,13 +705,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-white">NFT Management</h2>
               <div className="flex gap-3">
-                <Button 
-                  onClick={() => setIsCreatingAuction(true)} 
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Create Auction
-                </Button>
+
                 <Button 
                   onClick={() => setIsAddingNFT(true)} 
                   className="bg-primary hover:bg-primary/90"
@@ -710,54 +719,45 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             {/* NFT Filters */}
             <div className="flex items-center gap-4">
               <Button 
-                variant="outline" 
-                className="border-nft-border text-muted-foreground hover:bg-background"
-                onClick={() => {
-                  const availableNFTs = nfts.filter(nft => nft.status === 'available');
-                  setNfts(availableNFTs);
-                }}
+                variant={nftFilter === 'available' ? 'default' : 'outline'}
+                className={nftFilter === 'available' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background'}
+                onClick={() => setNftFilter('available')}
               >
                 Available ({nfts.filter(nft => nft.status === 'available').length})
               </Button>
               <Button 
-                variant="outline" 
-                className="border-nft-border text-muted-foreground hover:bg-background"
-                onClick={() => {
-                  const auctionNFTs = nfts.filter(nft => nft.status === 'auction');
-                  setNfts(auctionNFTs);
-                }}
+                variant={nftFilter === 'auction' ? 'default' : 'outline'}
+                className={nftFilter === 'auction' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background'}
+                onClick={() => setNftFilter('auction')}
               >
                 Ongoing Auctions ({nfts.filter(nft => nft.status === 'auction').length})
               </Button>
               <Button 
-                variant="outline" 
-                className="border-nft-border text-muted-foreground hover:bg-background"
-                onClick={() => {
-                  const soldNFTs = nfts.filter(nft => nft.status === 'sold');
-                  setNfts(soldNFTs);
-                }}
+                variant={nftFilter === 'sold' ? 'default' : 'outline'}
+                className={nftFilter === 'sold' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background'}
+                onClick={() => setNftFilter('sold')}
               >
                 Ended/Sold ({nfts.filter(nft => nft.status === 'sold').length})
               </Button>
               <Button 
-                variant="outline" 
-                className="border-nft-border text-muted-foreground hover:bg-background"
-                onClick={() => loadNFTs()}
+                variant={nftFilter === 'all' ? 'default' : 'outline'}
+                className={nftFilter === 'all' ? 'bg-primary hover:bg-primary/90' : 'border-nft-border text-muted-foreground hover:bg-background'}
+                onClick={() => setNftFilter('all')}
               >
                 Show All ({nfts.length})
               </Button>
             </div>
 
-            {/* Create Auction Form */}
+            {/* Convert to Auction Form */}
             {isCreatingAuction && (
-              <Card className="bg-gradient-card border border-nft-border">
+              <Card className="bg-gradient-card border border-green-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <Trophy className="w-6 h-6" />
-                    Create New Auction
+                    <Trophy className="w-6 h-6 text-green-400" />
+                    Convert NFT to Auction
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">
-                    Set up an auction for an existing NFT
+                    {auctionForm.nftId ? `Converting "${nfts.find(n => n.id === auctionForm.nftId)?.name}" to auction` : 'Set up auction parameters for your NFT'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -765,7 +765,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <div>
                          <Label htmlFor="nftSelect" className="text-muted-foreground">Select NFT</Label>
-                         <Select value={auctionForm.nftId} onValueChange={(value) => handleAuctionInputChange('nftId', value)}>
+                         <Select 
+                           value={auctionForm.nftId} 
+                           onValueChange={(value) => handleAuctionInputChange('nftId', value)}
+                           disabled={!!auctionForm.nftId} // Disable if NFT already selected
+                         >
                            <SelectTrigger className="bg-background border-nft-border text-foreground">
                              <SelectValue placeholder="Choose an NFT to auction" />
                            </SelectTrigger>
@@ -777,6 +781,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                              ))}
                            </SelectContent>
                          </Select>
+                         {auctionForm.nftId && (
+                           <p className="text-sm text-green-400 mt-1">
+                             ✓ NFT selected for auction conversion
+                           </p>
+                         )}
                        </div>
 
                        <div>
@@ -1085,7 +1094,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {nfts.map((nft) => (
+                  {filteredNFTs.map((nft) => (
                     <div key={nft.id} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
                       <div className="flex items-center gap-4">
                         <img src={nft.image} alt={nft.name} className="w-16 h-16 rounded-lg object-cover" />
@@ -1111,6 +1120,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
+                          {nft.status === 'available' && (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleConvertToAuction(nft)}
+                              className="border-green-500 text-green-400 hover:bg-green-500/20"
+                            >
+                              <Trophy className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button 
                             size="sm" 
                             variant="outline" 

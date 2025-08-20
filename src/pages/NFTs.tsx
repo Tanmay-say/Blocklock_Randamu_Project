@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } from '@/data/nfts';
+import { useNFT } from '@/contexts/NFTContext';
 import { Search, Filter, Grid3X3, List } from 'lucide-react';
 
 export const NFTs: React.FC = () => {
+  const { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } = useNFT();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [collectionFilter, setCollectionFilter] = useState<string>('all');
@@ -20,13 +21,13 @@ export const NFTs: React.FC = () => {
   const collections = useMemo(() => {
     const uniqueCollections = [...new Set(nfts.map(nft => nft.collection))];
     return uniqueCollections;
-  }, []);
+  }, [nfts]);
 
   const tags = useMemo(() => {
     const allTags = nfts.flatMap(nft => nft.tags);
     const uniqueTags = [...new Set(allTags)];
     return uniqueTags;
-  }, []);
+  }, [nfts]);
 
   // Filter NFTs based on search and filters
   const filteredNFTs = useMemo(() => {
@@ -58,7 +59,7 @@ export const NFTs: React.FC = () => {
     }
 
     return filtered;
-  }, [searchTerm, statusFilter, collectionFilter, tagFilter]);
+  }, [nfts, searchTerm, statusFilter, collectionFilter, tagFilter]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -190,6 +191,55 @@ export const NFTs: React.FC = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Quick Filter Buttons */}
+          <div className="flex items-center gap-4 mb-6">
+            <span className="text-white font-medium">Quick Filters:</span>
+            <Button
+              variant={statusFilter === 'available' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('available')}
+              className={statusFilter === 'available' 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'border-green-600 text-green-400 hover:bg-green-600/10'
+              }
+            >
+              Available ({nfts.filter(nft => nft.status === 'available').length})
+            </Button>
+            <Button
+              variant={statusFilter === 'auction' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('auction')}
+              className={statusFilter === 'auction' 
+                ? 'bg-primary hover:bg-primary/90 text-white' 
+                : 'border-primary text-primary hover:bg-primary/10'
+              }
+            >
+              Auction ({nfts.filter(nft => nft.status === 'auction').length})
+            </Button>
+            <Button
+              variant={statusFilter === 'sold' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('sold')}
+              className={statusFilter === 'sold' 
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : 'border-red-600 text-red-400 hover:bg-red-600/10'
+              }
+            >
+              Sold ({nfts.filter(nft => nft.status === 'sold').length})
+            </Button>
+            <Button
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('all')}
+              className={statusFilter === 'all' 
+                ? 'bg-gray-600 hover:bg-gray-700 text-white' 
+                : 'border-gray-600 text-gray-400 hover:bg-gray-600/10'
+              }
+            >
+              All ({nfts.length})
+            </Button>
           </div>
 
           {/* Results Summary */}

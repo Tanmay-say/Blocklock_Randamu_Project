@@ -10,13 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from '@/contexts/WalletContext';
-import { getNFTById } from '@/data/nfts';
+import { useNFT } from '@/contexts/NFTContext';
 import { ArrowLeft, Clock, Users, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const PlaceBid: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isConnected, account, signer } = useWallet();
+  const { getNFTById } = useNFT();
   
   const [nft, setNft] = useState<any>(null);
   const [bidAmount, setBidAmount] = useState<string>('');
