@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { Link, useLocation } from "react-router-dom";
 import { useWallet } from "@/contexts/WalletContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { Wallet, Settings, Bot, LogOut } from "lucide-react";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
 export const Header = () => {
   const location = useLocation();
   const { account, isConnected, isAdmin, connectWallet, disconnectWallet } = useWallet();
+  const { isAdminAuthenticated } = useAdmin();
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -68,8 +70,8 @@ export const Header = () => {
             GenAI
           </Link>
           
-          {/* Admin Panel - only visible to admins */}
-          {isAdmin && (
+          {/* Admin Panel - only visible to authenticated admins */}
+          {isAdminAuthenticated && (
             <Link 
               to="/admin" 
               className={`transition-colors flex items-center gap-2 text-lg ${isActive('/admin') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
@@ -95,7 +97,7 @@ export const Header = () => {
                 {account}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {isAdmin && (
+              {isAdminAuthenticated && (
                 <DropdownMenuItem asChild>
                   <Link to="/admin" className="cursor-pointer">
                     <Settings className="w-4 h-4 mr-2" />

@@ -6,135 +6,228 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWallet } from "@/contexts/WalletContext";
-import { Plus, Eye, Trophy, Users, Clock, DollarSign } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Trophy, Users, Clock, DollarSign, Image, Tag, Settings, Wallet, Coins } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { NFT } from '@/data/nfts';
 
-interface Auction {
-  id: number;
-  nft: string;
-  tokenId: number;
-  reserve: string;
-  endBlock: number;
-  seller: string;
-  settled: boolean;
-  winner: string;
-  winningBid: string;
-  bidders: string[];
+interface AdminPanelProps {
+  onLogout: () => void;
 }
 
-interface BidSubmission {
-  id: number;
-  auctionId: number;
-  bidder: string;
-  deposit: string;
-  timestamp: number;
-  status: 'pending' | 'processed' | 'refunded';
-}
-
-export const AdminPanel: React.FC = () => {
-  const { isAdmin, provider, signer } = useWallet();
-  const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [bidSubmissions, setBidSubmissions] = useState<BidSubmission[]>([]);
+export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
+  const { account, isConnected, provider, chainId } = useWallet();
+  const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<string>('0');
+  const [networkName, setNetworkName] = useState<string>('Unknown');
+  const [isSepolia, setIsSepolia] = useState<boolean>(false);
   
-  // Form states for creating auctions
-  const [nftAddress, setNftAddress] = useState('');
-  const [tokenId, setTokenId] = useState('');
-  const [reserve, setReserve] = useState('');
-  const [endBlock, setEndBlock] = useState('');
-  const [depositPct, setDepositPct] = useState('10');
+  // Form states for NFT management
+  const [isAddingNFT, setIsAddingNFT] = useState(false);
+  const [editingNFT, setEditingNFT] = useState<NFT | null>(null);
+  const [nftForm, setNftForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    collection: '',
+    tags: '',
+    image: '',
+    creator: '',
+    mintDate: '',
+    status: 'available' as 'available' | 'auction' | 'sold'
+  });
 
-  // Mock data for demonstration
+  // Auction form states
+  const [isCreatingAuction, setIsCreatingAuction] = useState(false);
+  const [auctionForm, setAuctionForm] = useState({
+    nftId: '',
+    startingPrice: '',
+    reservePrice: '',
+    duration: '24', // hours
+    startTime: new Date().toISOString().slice(0, 16), // Set default to current time
+    description: '',
+    creator: ''
+  });
+
+  // Image upload states
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Load NFTs and wallet info on component mount
   useEffect(() => {
-    if (isAdmin) {
-      // Load mock data
-      setAuctions([
-        {
-          id: 1,
-          nft: "0x1234...5678",
-          tokenId: 1,
-          reserve: "0.1",
-          endBlock: 12345678,
-          seller: "0xabcd...efgh",
-          settled: false,
-          winner: "",
-          winningBid: "0",
-          bidders: ["0xuser1...", "0xuser2...", "0xuser3..."]
-        },
-        {
-          id: 2,
-          nft: "0x8765...4321",
-          tokenId: 5,
-          reserve: "0.05",
-          endBlock: 12345680,
-          seller: "0xdcba...hgfe",
-          settled: true,
-          winner: "0xwinner...",
-          winningBid: "0.08",
-          bidders: ["0xuser4...", "0xuser5..."]
-        }
-      ]);
-
-      setBidSubmissions([
-        {
-          id: 1,
-          auctionId: 1,
-          bidder: "0xuser1...",
-          deposit: "0.01",
-          timestamp: Date.now() - 3600000,
-          status: 'pending'
-        },
-        {
-          id: 2,
-          auctionId: 1,
-          bidder: "0xuser2...",
-          deposit: "0.01",
-          timestamp: Date.now() - 1800000,
-          status: 'processed'
-        },
-        {
-          id: 3,
-          auctionId: 1,
-          bidder: "0xuser3...",
-          deposit: "0.01",
-          timestamp: Date.now() - 900000,
-          status: 'pending'
-        }
-      ]);
+    loadNFTs();
+    if (isConnected && provider) {
+      loadWalletInfo();
     }
-  }, [isAdmin]);
+  }, [isConnected, provider]);
 
-  const handleCreateAuction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signer) {
-      toast({
-        title: "Error",
-        description: "Please connect your wallet first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
+  // Load wallet information
+  const loadWalletInfo = async () => {
+    if (!provider || !account) return;
+    
     try {
-      // Here you would call the smart contract to create auction
-      // For now, just show success message
-      toast({
-        title: "Success",
-        description: "Auction created successfully!",
-      });
+      // Get wallet balance
+      const balance = await provider.getBalance(account);
+      const balanceInEth = parseFloat(balance.toString()) / Math.pow(10, 18);
+      setWalletBalance(balanceInEth.toFixed(4));
+
+      // Get network information
+      const network = await provider.getNetwork();
+      const networkId = Number(network.chainId);
       
-      // Reset form
-      setNftAddress('');
-      setTokenId('');
-      setReserve('');
-      setEndBlock('');
-      setDepositPct('10');
+      if (networkId === 11155111) { // Ethereum Sepolia
+        setNetworkName('Ethereum Sepolia');
+        setIsSepolia(true);
+      } else if (networkId === 1) { // Ethereum Mainnet
+        setNetworkName('Ethereum Mainnet');
+        setIsSepolia(false);
+      } else {
+        setNetworkName(`Network ID: ${networkId}`);
+        setIsSepolia(false);
+      }
     } catch (error) {
+      console.error('Error loading wallet info:', error);
+    }
+  };
+
+  const loadNFTs = () => {
+    // In a real app, this would fetch from your backend
+    // For now, we'll use mock data
+    const mockNFTs: NFT[] = [
+      {
+        id: "1",
+        name: "Cosmic Wanderer #001",
+        description: "A mysterious traveler from the depths of space",
+        image: "/src/assets/nft-1.png",
+        price: 0.005,
+        tags: ["Space", "Cosmic", "Mystical"],
+        creator: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
+        collection: "Cosmic Collection",
+        mintDate: "2024-01-15",
+        attributes: [
+          { trait_type: "Background", value: "Nebula" },
+          { trait_type: "Rarity", value: "Legendary" }
+        ],
+        status: 'available',
+        currentBids: 0
+      },
+      {
+        id: "2",
+        name: "Tanmay's new1",
+        description: "abc",
+        image: "/src/assets/nft-2.png",
+        price: 0.0001,
+        tags: ["Art", "Digital"],
+        creator: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
+        collection: "Tanmay Collection",
+        mintDate: "2024-01-20",
+        attributes: [
+          { trait_type: "Style", value: "Abstract" },
+          { trait_type: "Rarity", value: "Common" }
+        ],
+        status: 'available',
+        currentBids: 0
+      }
+    ];
+    setNfts(mockNFTs);
+  };
+
+  const resetForm = () => {
+    setNftForm({
+      name: '',
+      description: '',
+      price: '',
+      collection: '',
+      tags: '',
+      image: '',
+      creator: '',
+      mintDate: '',
+      status: 'available'
+    });
+    setIsAddingNFT(false);
+    setEditingNFT(null);
+    setImagePreview('');
+    setSelectedImage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    console.log('Submitting NFT form:', nftForm);
+    console.log('Image preview:', imagePreview);
+    console.log('Selected image:', selectedImage);
+
+    try {
+      // Validate required fields
+      if (!nftForm.name || !nftForm.description || !nftForm.price || !nftForm.collection) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (editingNFT) {
+        // Update existing NFT
+        const updatedNFTs = nfts.map(nft => 
+          nft.id === editingNFT.id 
+            ? { 
+                ...nft, 
+                name: nftForm.name,
+                description: nftForm.description,
+                price: parseFloat(nftForm.price),
+                collection: nftForm.collection,
+                tags: nftForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+                image: nftForm.image || imagePreview || nft.image,
+                creator: nftForm.creator,
+                mintDate: nftForm.mintDate,
+                status: nftForm.status
+              }
+            : nft
+        );
+        setNfts(updatedNFTs);
+        toast({
+          title: "NFT Updated",
+          description: "The NFT has been successfully updated.",
+        });
+      } else {
+        // Add new NFT
+        const newNFT: NFT = {
+          id: Date.now().toString(),
+          name: nftForm.name,
+          description: nftForm.description,
+          image: nftForm.image || imagePreview || "/src/assets/nft-1.png",
+          price: parseFloat(nftForm.price),
+          tags: nftForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          creator: nftForm.creator || account || "0x0000000000000000000000000000000000000000",
+          collection: nftForm.collection,
+          mintDate: nftForm.mintDate || new Date().toISOString().split('T')[0],
+          attributes: [],
+          status: nftForm.status,
+          currentBids: 0
+        };
+        
+        console.log('Adding new NFT:', newNFT);
+        setNfts(prevNfts => [...prevNfts, newNFT]);
+        toast({
+          title: "NFT Added",
+          description: "New NFT has been successfully added to the marketplace.",
+        });
+      }
+      
+      resetForm();
+      setImagePreview('');
+      setSelectedImage(null);
+    } catch (error) {
+      console.error('NFT save error:', error);
       toast({
         title: "Error",
-        description: "Failed to create auction",
+        description: "Failed to save NFT. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -142,350 +235,1059 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleProcessBid = async (bidId: number) => {
-    try {
-      // Here you would call the smart contract to process the bid
-      setBidSubmissions(prev => 
-        prev.map(bid => 
-          bid.id === bidId 
-            ? { ...bid, status: 'processed' as const }
-            : bid
-        )
-      );
-      
+  const handleEdit = (nft: NFT) => {
+    setEditingNFT(nft);
+    setNftForm({
+      name: nft.name,
+      description: nft.description,
+      price: nft.price.toString(),
+      collection: nft.collection,
+      tags: nft.tags.join(', '),
+      image: nft.image,
+      creator: nft.creator,
+      mintDate: nft.mintDate,
+      status: nft.status
+    });
+    setIsAddingNFT(true);
+  };
+
+  const handleDelete = async (nftId: string) => {
+    if (window.confirm('Are you sure you want to delete this NFT?')) {
+      const updatedNFTs = nfts.filter(nft => nft.id !== nftId);
+      setNfts(updatedNFTs);
       toast({
-        title: "Success",
-        description: "Bid processed successfully!",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to process bid",
-        variant: "destructive",
+        title: "NFT Deleted",
+        description: "The NFT has been successfully removed.",
       });
     }
   };
 
-  const handleFinalizeAuction = async (auctionId: number) => {
-    try {
-      // Here you would call the smart contract to finalize the auction
-      setAuctions(prev => 
-        prev.map(auction => 
-          auction.id === auctionId 
-            ? { ...auction, settled: true }
-            : auction
-        )
-      );
-      
-      toast({
-        title: "Success",
-        description: "Auction finalized successfully!",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to finalize auction",
-        variant: "destructive",
-      });
+  const handleInputChange = (field: string, value: string) => {
+    setNftForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Image upload functions
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-red-600">Access Denied</CardTitle>
-            <CardDescription className="text-center">
-              You need admin privileges to access this panel.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
+  const uploadImage = async (): Promise<string> => {
+    if (!selectedImage) return '';
+    
+    setUploadingImage(true);
+    try {
+      // Simulate image upload to IPFS or cloud storage
+      // In production, you would upload to IPFS, Arweave, or similar
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generate a mock IPFS hash (in production, this would be the actual hash)
+      const mockHash = `ipfs://Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Image has been successfully uploaded to IPFS.",
+      });
+      
+      return mockHash;
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      return '';
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Auction functions
+  const handleAuctionInputChange = (field: string, value: string) => {
+    setAuctionForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const createAuction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    console.log('Creating auction with form data:', auctionForm);
+    console.log('Available NFTs:', nfts.filter(nft => nft.status === 'available'));
+
+    try {
+      // Validate required fields
+      if (!auctionForm.nftId) {
+        toast({
+          title: "Error",
+          description: "Please select an NFT to auction.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!auctionForm.startingPrice || parseFloat(auctionForm.startingPrice) <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid starting price.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Find the NFT to auction
+      const nftToAuction = nfts.find(nft => nft.id === auctionForm.nftId);
+      console.log('NFT to auction:', nftToAuction);
+      
+      if (!nftToAuction) {
+        toast({
+          title: "Error",
+          description: "Selected NFT not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if NFT is available
+      if (nftToAuction.status !== 'available') {
+        toast({
+          title: "Error",
+          description: "Selected NFT is not available for auction.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update NFT status to auction
+      const updatedNFTs = nfts.map(nft => 
+        nft.id === auctionForm.nftId 
+          ? { 
+              ...nft, 
+              status: 'auction' as const,
+              price: parseFloat(auctionForm.startingPrice),
+              auctionEndTime: new Date(Date.now() + parseInt(auctionForm.duration) * 60 * 60 * 1000).toISOString(),
+              currentBids: 0
+            }
+          : nft
+      );
+      
+      setNfts(updatedNFTs);
+      
+      toast({
+        title: "Auction Created",
+        description: `Auction for ${nftToAuction.name} has been successfully created.`,
+      });
+
+      // Reset auction form
+      setAuctionForm({
+        nftId: '',
+        startingPrice: '',
+        reservePrice: '',
+        duration: '24',
+        startTime: new Date().toISOString().slice(0, 16),
+        description: '',
+        creator: ''
+      });
+      setIsCreatingAuction(false);
+      
+    } catch (error) {
+      console.error('Auction creation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create auction. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetAuctionForm = () => {
+    setAuctionForm({
+      nftId: '',
+      startingPrice: '',
+      reservePrice: '',
+      duration: '24',
+      startTime: new Date().toISOString().slice(0, 16),
+      description: '',
+      creator: ''
+    });
+    setIsCreatingAuction(false);
+  };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
-          <p className="text-muted-foreground">
-            Manage auctions, view bid submissions, and control the marketplace
-          </p>
+    <div className="min-h-screen bg-gradient-dark">
+      {/* Header */}
+      <div className="bg-gradient-card border-b border-nft-border p-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Admin Panel</h1>
+            <p className="text-muted-foreground">Manage your NFT marketplace</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* Wallet Info */}
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Connected Wallet</p>
+                <p className="text-white font-mono">{account?.slice(0, 6)}...{account?.slice(-4)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Balance</p>
+                <p className="text-white font-mono">{walletBalance} ETH</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Network</p>
+                <p className={`font-mono ${isSepolia ? 'text-green-400' : 'text-orange-400'}`}>
+                  {networkName}
+                </p>
+              </div>
+              <Button 
+                onClick={loadWalletInfo} 
+                size="sm" 
+                variant="outline" 
+                className="border-nft-border text-muted-foreground hover:bg-background"
+              >
+                <Coins className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+            <Button onClick={onLogout} variant="outline" className="border-nft-border text-muted-foreground hover:bg-background">
+              Logout
+            </Button>
+          </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="auctions">Auctions</TabsTrigger>
-            <TabsTrigger value="bids">Bid Submissions</TabsTrigger>
-            <TabsTrigger value="create">Create Auction</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-gradient-card border border-nft-border">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="account" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Account
+            </TabsTrigger>
+            <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              NFT Management
+            </TabsTrigger>
+            <TabsTrigger value="auctions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Auctions
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Settings
+            </TabsTrigger>
           </TabsList>
 
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Auctions</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{auctions.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {auctions.filter(a => !a.settled).length} active
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bids</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{bidSubmissions.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {bidSubmissions.filter(b => b.status === 'pending').length} pending
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Volume</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {auctions.reduce((sum, a) => sum + parseFloat(a.winningBid || '0'), 0).toFixed(3)} ETH
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-blue-500/20 rounded-lg">
+                      <Image className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{nfts.length}</p>
+                      <p className="text-muted-foreground">Total NFTs</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    From settled auctions
-                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-green-500/20 rounded-lg">
+                      <Trophy className="w-6 h-6 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {nfts.filter(nft => nft.status === 'auction').length}
+                      </p>
+                      <p className="text-muted-foreground">Active Auctions</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-orange-500/20 rounded-lg">
+                      <Users className="w-6 h-6 text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {nfts.filter(nft => nft.status === 'sold').length}
+                      </p>
+                      <p className="text-muted-foreground">Sold NFTs</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-purple-500/20 rounded-lg">
+                      <DollarSign className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {nfts.reduce((total, nft) => total + nft.price, 0).toFixed(3)}
+                      </p>
+                      <p className="text-muted-foreground">Total Value (ETH)</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
+
+                         <div className="flex items-center justify-between">
+               <h3 className="text-xl font-semibold text-white">Recent Activity</h3>
+               <Button 
+                 onClick={() => setIsCreatingAuction(true)} 
+                 size="sm"
+                 className="bg-green-600 hover:bg-green-700"
+               >
+                 <Trophy className="w-4 h-4 mr-2" />
+                 Quick Auction
+               </Button>
+             </div>
+             <Card className="bg-gradient-card border border-nft-border">
+               <CardContent>
+                 <div className="space-y-4">
+                   {nfts.slice(0, 5).map((nft) => (
+                     <div key={nft.id} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                       <div className="flex items-center gap-4">
+                         <img src={nft.image} alt={nft.name} className="w-12 h-12 rounded-lg object-cover" />
+                         <div>
+                           <p className="font-medium text-white">{nft.name}</p>
+                           <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="font-medium text-primary">{nft.price} ETH</p>
+                         <Badge variant="outline" className="border-nft-border text-muted-foreground">
+                           {nft.status}
+                         </Badge>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
           </TabsContent>
 
-          <TabsContent value="auctions" className="space-y-6">
-            <Card>
+          {/* Account Tab */}
+          <TabsContent value="account" className="space-y-6">
+            <Card className="bg-gradient-card border border-nft-border">
               <CardHeader>
-                <CardTitle>Active Auctions</CardTitle>
-                <CardDescription>
-                  Manage and monitor all auctions in the marketplace
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Wallet className="w-6 h-6" />
+                  Wallet Information
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  View your connected wallet details and network information
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {auctions.map((auction) => (
-                    <div key={auction.id} className="border rounded-lg p-4 space-y-3">
+              <CardContent className="space-y-6">
+                {/* Wallet Status */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                    <h4 className="font-medium text-white mb-3">Connection Status</h4>
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold">Auction #{auction.id}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            NFT: {auction.nft} | Token ID: {auction.tokenId}
-                          </p>
-                        </div>
-                        <Badge variant={auction.settled ? "secondary" : "default"}>
-                          {auction.settled ? "Settled" : "Active"}
+                        <span className="text-muted-foreground">Status:</span>
+                        <Badge variant={isConnected ? "default" : "destructive"}>
+                          {isConnected ? 'Connected' : 'Disconnected'}
                         </Badge>
                       </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Reserve:</span>
-                          <p className="font-medium">{auction.reserve} ETH</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">End Block:</span>
-                          <p className="font-medium">{auction.endBlock}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Bidders:</span>
-                          <p className="font-medium">{auction.bidders.length}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Winner:</span>
-                          <p className="font-medium">
-                            {auction.winner || "TBD"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {!auction.settled && (
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleFinalizeAuction(auction.id)}
-                          >
-                            Finalize Auction
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="bids" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Bid Submissions</CardTitle>
-                <CardDescription>
-                  View and manage all submitted bids across auctions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {bidSubmissions.map((bid) => (
-                    <div key={bid.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold">Bid #{bid.id}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Auction #{bid.auctionId} | Bidder: {bid.bidder}
-                          </p>
-                        </div>
-                        <Badge 
-                          variant={
-                            bid.status === 'pending' ? 'default' : 
-                            bid.status === 'processed' ? 'secondary' : 'outline'
-                          }
-                        >
-                          {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                        <span className="text-muted-foreground">Address:</span>
+                        <span className="text-white font-mono text-sm">
+                          {account || 'Not connected'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                    <h4 className="font-medium text-white mb-3">Network Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Network:</span>
+                        <Badge variant={isSepolia ? "default" : "secondary"}>
+                          {networkName}
                         </Badge>
                       </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Deposit:</span>
-                          <p className="font-medium">{bid.deposit} ETH</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Submitted:</span>
-                          <p className="font-medium">
-                            {new Date(bid.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Status:</span>
-                          <p className="font-medium capitalize">{bid.status}</p>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Chain ID:</span>
+                        <span className="text-white font-mono text-sm">
+                          {chainId || 'Unknown'}
+                        </span>
                       </div>
-
-                      {bid.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleProcessBid(bid.id)}
-                          >
-                            Process Bid
-                          </Button>
-                        </div>
-                      )}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="create" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create New Auction</CardTitle>
-                <CardDescription>
-                  Set up a new sealed-bid auction for an NFT
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleCreateAuction} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="nftAddress">NFT Contract Address</Label>
-                      <Input
-                        id="nftAddress"
-                        value={nftAddress}
-                        onChange={(e) => setNftAddress(e.target.value)}
-                        placeholder="0x..."
-                        required
-                      />
+                {/* Balance Information */}
+                <div className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                  <h4 className="font-medium text-white mb-3 flex items-center gap-2">
+                    <Coins className="w-5 h-5" />
+                    Balance Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-gradient-hero/20 rounded-lg">
+                      <p className="text-2xl font-bold text-primary">{walletBalance}</p>
+                      <p className="text-muted-foreground">ETH Balance</p>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="tokenId">Token ID</Label>
-                      <Input
-                        id="tokenId"
-                        type="number"
-                        value={tokenId}
-                        onChange={(e) => setTokenId(e.target.value)}
-                        placeholder="1"
-                        required
-                      />
+                    <div className="text-center p-4 bg-gradient-hero/20 rounded-lg">
+                      <p className="text-2xl font-bold text-green-400">
+                        {isSepolia ? '✓' : '✗'}
+                      </p>
+                      <p className="text-muted-foreground">Sepolia Network</p>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-hero/20 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-400">
+                        {isConnected ? '✓' : '✗'}
+                      </p>
+                      <p className="text-muted-foreground">Wallet Connected</p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reserve">Reserve Price (ETH)</Label>
-                      <Input
-                        id="reserve"
-                        type="number"
-                        step="0.001"
-                        value={reserve}
-                        onChange={(e) => setReserve(e.target.value)}
-                        placeholder="0.1"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="endBlock">End Block</Label>
-                      <Input
-                        id="endBlock"
-                        type="number"
-                        value={endBlock}
-                        onChange={(e) => setEndBlock(e.target.value)}
-                        placeholder="12345678"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="depositPct">Deposit Percentage (Basis Points)</Label>
-                    <Input
-                      id="depositPct"
-                      type="number"
-                      value={depositPct}
-                      onChange={(e) => setDepositPct(e.target.value)}
-                      placeholder="10"
-                      min="10"
-                      max="50"
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      10 = 0.1%, 50 = 0.5% (minimum deposit as percentage of reserve)
-                    </p>
-                  </div>
-
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Creating Auction...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Create Auction
-                      </div>
-                    )}
+                {/* Actions */}
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={loadWalletInfo} 
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Coins className="w-4 h-4 mr-2" />
+                    Refresh Balance
                   </Button>
-                </form>
+                  <Button 
+                    variant="outline" 
+                    className="border-nft-border text-muted-foreground hover:bg-background"
+                    onClick={() => window.open('https://sepolia.etherscan.io/', '_blank')}
+                  >
+                    View on Etherscan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* NFT Management Tab */}
+          <TabsContent value="nfts" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">NFT Management</h2>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setIsCreatingAuction(true)} 
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Create Auction
+                </Button>
+                <Button 
+                  onClick={() => setIsAddingNFT(true)} 
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add New NFT
+                </Button>
+              </div>
+            </div>
+
+            {/* NFT Filters */}
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                className="border-nft-border text-muted-foreground hover:bg-background"
+                onClick={() => {
+                  const availableNFTs = nfts.filter(nft => nft.status === 'available');
+                  setNfts(availableNFTs);
+                }}
+              >
+                Available ({nfts.filter(nft => nft.status === 'available').length})
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-nft-border text-muted-foreground hover:bg-background"
+                onClick={() => {
+                  const auctionNFTs = nfts.filter(nft => nft.status === 'auction');
+                  setNfts(auctionNFTs);
+                }}
+              >
+                Ongoing Auctions ({nfts.filter(nft => nft.status === 'auction').length})
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-nft-border text-muted-foreground hover:bg-background"
+                onClick={() => {
+                  const soldNFTs = nfts.filter(nft => nft.status === 'sold');
+                  setNfts(soldNFTs);
+                }}
+              >
+                Ended/Sold ({nfts.filter(nft => nft.status === 'sold').length})
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-nft-border text-muted-foreground hover:bg-background"
+                onClick={() => loadNFTs()}
+              >
+                Show All ({nfts.length})
+              </Button>
+            </div>
+
+            {/* Create Auction Form */}
+            {isCreatingAuction && (
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Trophy className="w-6 h-6" />
+                    Create New Auction
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Set up an auction for an existing NFT
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={createAuction} className="space-y-6">
+                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <div>
+                         <Label htmlFor="nftSelect" className="text-muted-foreground">Select NFT</Label>
+                         <Select value={auctionForm.nftId} onValueChange={(value) => handleAuctionInputChange('nftId', value)}>
+                           <SelectTrigger className="bg-background border-nft-border text-foreground">
+                             <SelectValue placeholder="Choose an NFT to auction" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-background border-nft-border">
+                             {nfts.filter(nft => nft.status === 'available').map((nft) => (
+                               <SelectItem key={nft.id} value={nft.id}>
+                                 {nft.name} - {nft.price} ETH
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
+
+                       <div>
+                         <Label htmlFor="startingPrice" className="text-muted-foreground">Starting Price (ETH)</Label>
+                         <Input
+                           id="startingPrice"
+                           type="number"
+                           step="0.001"
+                           value={auctionForm.startingPrice}
+                           onChange={(e) => handleAuctionInputChange('startingPrice', e.target.value)}
+                           placeholder="0.005"
+                           className="bg-background border-nft-border text-foreground"
+                           required
+                         />
+                       </div>
+
+                       <div>
+                         <Label htmlFor="reservePrice" className="text-muted-foreground">Reserve Price (ETH)</Label>
+                         <Input
+                           id="reservePrice"
+                           type="number"
+                           step="0.001"
+                           value={auctionForm.reservePrice}
+                           onChange={(e) => handleAuctionInputChange('reservePrice', e.target.value)}
+                           placeholder="0.003"
+                           className="bg-background border-nft-border text-foreground"
+                         />
+                       </div>
+
+                       <div>
+                         <Label htmlFor="duration" className="text-muted-foreground">Duration (hours)</Label>
+                         <Select value={auctionForm.duration} onValueChange={(value) => handleAuctionInputChange('duration', value)}>
+                           <SelectTrigger className="bg-background border-nft-border text-foreground">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent className="bg-background border-nft-border">
+                             <SelectItem value="1">1 hour</SelectItem>
+                             <SelectItem value="6">6 hours</SelectItem>
+                             <SelectItem value="12">12 hours</SelectItem>
+                             <SelectItem value="24">24 hours</SelectItem>
+                             <SelectItem value="48">48 hours</SelectItem>
+                             <SelectItem value="72">72 hours</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+
+                       <div>
+                         <Label htmlFor="creator" className="text-muted-foreground">Creator Address</Label>
+                         <Input
+                           id="creator"
+                           value={auctionForm.creator || account || ''}
+                           onChange={(e) => handleAuctionInputChange('creator', e.target.value)}
+                           placeholder="0x..."
+                           className="bg-background border-nft-border text-foreground"
+                         />
+                       </div>
+
+                       <div>
+                         <Label htmlFor="startTime" className="text-muted-foreground">Start Time</Label>
+                         <Input
+                           id="startTime"
+                           type="datetime-local"
+                           value={auctionForm.startTime}
+                           onChange={(e) => handleAuctionInputChange('startTime', e.target.value)}
+                           className="bg-background border-nft-border text-foreground"
+                         />
+                       </div>
+                     </div>
+
+                    <div>
+                      <Label htmlFor="auctionDescription" className="text-muted-foreground">Auction Description</Label>
+                      <Textarea
+                        id="auctionDescription"
+                        value={auctionForm.description}
+                        onChange={(e) => handleAuctionInputChange('description', e.target.value)}
+                        placeholder="Describe the auction terms and conditions..."
+                        className="bg-background border-nft-border text-foreground min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="flex gap-4">
+                                             <Button 
+                         type="submit" 
+                         className="bg-green-600 hover:bg-green-700"
+                         disabled={loading || !auctionForm.nftId || !auctionForm.startingPrice || parseFloat(auctionForm.startingPrice) <= 0}
+                       >
+                         {loading ? 'Creating...' : 'Create Auction'}
+                       </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={resetAuctionForm}
+                        className="border-nft-border text-muted-foreground hover:bg-background"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Add/Edit NFT Form */}
+            {isAddingNFT && (
+              <Card className="bg-gradient-card border border-nft-border">
+                <CardHeader>
+                  <CardTitle className="text-white">
+                    {editingNFT ? 'Edit NFT' : 'Add New NFT'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <Label htmlFor="name" className="text-muted-foreground">NFT Name</Label>
+                        <Input
+                          id="name"
+                          value={nftForm.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          placeholder="Enter NFT name"
+                          className="bg-background border-nft-border text-foreground"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="price" className="text-muted-foreground">Price (ETH)</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.001"
+                          value={nftForm.price}
+                          onChange={(e) => handleInputChange('price', e.target.value)}
+                          placeholder="0.005"
+                          className="bg-background border-nft-border text-foreground"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="collection" className="text-muted-foreground">Collection</Label>
+                        <Input
+                          id="collection"
+                          value={nftForm.collection}
+                          onChange={(e) => handleInputChange('collection', e.target.value)}
+                          placeholder="Enter collection name"
+                          className="bg-background border-nft-border text-foreground"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="status" className="text-muted-foreground">Status</Label>
+                        <Select value={nftForm.status} onValueChange={(value) => handleInputChange('status', value)}>
+                          <SelectTrigger className="bg-background border-nft-border text-foreground">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border-nft-border">
+                            <SelectItem value="available">Available</SelectItem>
+                            <SelectItem value="auction">Auction</SelectItem>
+                            <SelectItem value="sold">Sold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="tags" className="text-muted-foreground">Tags (comma-separated)</Label>
+                        <Input
+                          id="tags"
+                          value={nftForm.tags}
+                          onChange={(e) => handleInputChange('tags', e.target.value)}
+                          placeholder="Space, Cosmic, Mystical"
+                          className="bg-background border-nft-border text-foreground"
+                        />
+                      </div>
+
+                                             <div>
+                         <Label htmlFor="image" className="text-muted-foreground">Image Upload</Label>
+                         <div className="space-y-3">
+                                                       {/* Image Preview */}
+                            {imagePreview && (
+                              <div className="relative">
+                                <img 
+                                  src={imagePreview} 
+                                  alt="Preview" 
+                                  className="w-32 h-32 object-cover rounded-lg border border-nft-border"
+                                />
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedImage(null);
+                                    setImagePreview('');
+                                    setNftForm(prev => ({ ...prev, image: '' }));
+                                  }}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white hover:bg-red-600 border-0"
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            )}
+
+                            {/* Current Image Display */}
+                            {nftForm.image && !imagePreview && (
+                              <div className="relative">
+                                <img 
+                                  src={nftForm.image} 
+                                  alt="Current" 
+                                  className="w-32 h-32 object-cover rounded-lg border border-nft-border"
+                                />
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setNftForm(prev => ({ ...prev, image: '' }));
+                                  }}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white hover:bg-red-600 border-0"
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            )}
+                           
+                           {/* File Input */}
+                           <Input
+                             id="image"
+                             type="file"
+                             accept="image/*"
+                             onChange={handleImageSelect}
+                             className="bg-background border-nft-border text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                           />
+                           
+                                                       {/* Upload Button */}
+                            {selectedImage && !imagePreview && (
+                              <Button
+                                type="button"
+                                onClick={async () => {
+                                  const imageUrl = await uploadImage();
+                                  if (imageUrl) {
+                                    setNftForm(prev => ({ ...prev, image: imageUrl }));
+                                    setImagePreview(imageUrl);
+                                  }
+                                }}
+                                disabled={uploadingImage}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                              </Button>
+                            )}
+                           
+                           {/* Manual URL Input */}
+                           <div className="pt-2">
+                             <Label htmlFor="imageUrl" className="text-xs text-muted-foreground">Or enter image URL manually:</Label>
+                             <Input
+                               id="imageUrl"
+                               value={nftForm.image}
+                               onChange={(e) => handleInputChange('image', e.target.value)}
+                               placeholder="https://example.com/image.png or ipfs://..."
+                               className="bg-background border-nft-border text-foreground text-sm"
+                             />
+                           </div>
+                         </div>
+                       </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="description" className="text-muted-foreground">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={nftForm.description}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        placeholder="Enter detailed description"
+                        className="bg-background border-nft-border text-foreground min-h-[100px]"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex gap-4">
+                      <Button 
+                        type="submit" 
+                        className="bg-primary hover:bg-primary/90"
+                        disabled={loading}
+                      >
+                        {loading ? 'Saving...' : (editingNFT ? 'Update NFT' : 'Add NFT')}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={resetForm}
+                        className="border-nft-border text-muted-foreground hover:bg-background"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* NFT List */}
+            <Card className="bg-gradient-card border border-nft-border">
+              <CardHeader>
+                <CardTitle className="text-white">All NFTs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {nfts.map((nft) => (
+                    <div key={nft.id} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <img src={nft.image} alt={nft.name} className="w-16 h-16 rounded-lg object-cover" />
+                        <div>
+                          <p className="font-medium text-white">{nft.name}</p>
+                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                          <p className="text-sm text-muted-foreground">{nft.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-medium text-primary">{nft.price} ETH</p>
+                          <Badge variant="outline" className="border-nft-border text-muted-foreground">
+                            {nft.status}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleEdit(nft)}
+                            className="border-nft-border text-muted-foreground hover:bg-background"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleDelete(nft.id)}
+                            className="border-red-500 text-red-400 hover:bg-red-500/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+                     {/* Auctions Tab */}
+           <TabsContent value="auctions" className="space-y-6">
+             <div className="flex items-center justify-between">
+               <h2 className="text-2xl font-bold text-white">Auction Management</h2>
+               <Button 
+                 onClick={() => setIsCreatingAuction(true)} 
+                 className="bg-green-600 hover:bg-green-700"
+               >
+                 <Trophy className="w-4 h-4 mr-2" />
+                 Create New Auction
+               </Button>
+             </div>
+
+             {/* Active Auctions */}
+             <Card className="bg-gradient-card border border-nft-border">
+               <CardHeader>
+                 <CardTitle className="text-white flex items-center gap-2">
+                   <Clock className="w-6 h-6" />
+                   Active Auctions
+                 </CardTitle>
+                 <CardDescription className="text-muted-foreground">
+                   Monitor ongoing auctions and bidding activity
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 {nfts.filter(nft => nft.status === 'auction').length > 0 ? (
+                   <div className="space-y-4">
+                     {nfts.filter(nft => nft.status === 'auction').map((nft) => (
+                       <div key={nft.id} className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                         <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-4">
+                             <img src={nft.image} alt={nft.name} className="w-16 h-16 rounded-lg object-cover" />
+                             <div>
+                               <h4 className="font-medium text-white">{nft.name}</h4>
+                               <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                               <p className="text-sm text-muted-foreground">
+                                 Starting Price: <span className="text-primary">{nft.price} ETH</span>
+                               </p>
+                               {nft.auctionEndTime && (
+                                 <p className="text-sm text-muted-foreground">
+                                   Ends: {new Date(nft.auctionEndTime).toLocaleString()}
+                                 </p>
+                               )}
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <Badge variant="default" className="bg-green-600">
+                               Active Auction
+                             </Badge>
+                             <p className="text-sm text-muted-foreground mt-2">
+                               Bids: {nft.currentBids || 0}
+                             </p>
+                             <div className="flex gap-2 mt-3">
+                               <Button 
+                                 size="sm" 
+                                 variant="outline" 
+                                 className="border-nft-border text-muted-foreground hover:bg-background"
+                               >
+                                 <Eye className="w-4 h-4 mr-2" />
+                                 View Details
+                               </Button>
+                               <Button 
+                                 size="sm" 
+                                 variant="outline" 
+                                 className="border-nft-border text-muted-foreground hover:bg-background"
+                               >
+                                 <Users className="w-4 h-4 mr-2" />
+                                 View Bids
+                               </Button>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 ) : (
+                   <div className="text-center py-12">
+                     <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                     <h3 className="text-lg font-medium text-white mb-2">No Active Auctions</h3>
+                     <p className="text-muted-foreground mb-4">
+                       Create your first auction to get started.
+                     </p>
+                     <Button 
+                       onClick={() => setIsCreatingAuction(true)} 
+                       className="bg-green-600 hover:bg-green-700"
+                     >
+                       <Trophy className="w-4 h-4 mr-2" />
+                       Create Auction
+                     </Button>
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+
+             {/* Ended Auctions */}
+             <Card className="bg-gradient-card border border-nft-border">
+               <CardHeader>
+                 <CardTitle className="text-white flex items-center gap-2">
+                   <Trophy className="w-6 h-6" />
+                   Ended Auctions
+                 </CardTitle>
+                 <CardDescription className="text-muted-foreground">
+                   View completed auctions and results
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 {nfts.filter(nft => nft.status === 'sold').length > 0 ? (
+                   <div className="space-y-4">
+                     {nfts.filter(nft => nft.status === 'sold').map((nft) => (
+                       <div key={nft.id} className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                         <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-4">
+                             <img src={nft.image} alt={nft.name} className="w-16 h-16 rounded-lg object-cover" />
+                             <div>
+                               <h4 className="font-medium text-white">{nft.name}</h4>
+                               <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                               <p className="text-sm text-muted-foreground">
+                                 Final Price: <span className="text-primary">{nft.price} ETH</span>
+                               </p>
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <Badge variant="secondary">
+                               Sold
+                             </Badge>
+                             <p className="text-sm text-muted-foreground mt-2">
+                               Total Bids: {nft.currentBids || 0}
+                             </p>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 ) : (
+                   <div className="text-center py-8">
+                     <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                     <p className="text-muted-foreground">No completed auctions yet.</p>
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+           </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-gradient-card border border-nft-border">
+              <CardHeader>
+                <CardTitle className="text-white">Admin Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Configure marketplace settings and preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <Settings className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">Settings Panel</h3>
+                  <p className="text-muted-foreground">
+                    Configuration options will be available here.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
