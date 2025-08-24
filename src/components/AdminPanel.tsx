@@ -12,7 +12,10 @@ import { useNFT } from "@/contexts/NFTContext";
 import { Plus, Edit, Trash2, Eye, Trophy, Users, Clock, DollarSign, Image, Tag, Settings, Wallet, Coins } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { NFT } from '@/data/nfts';
+import { AuctionManager } from './AuctionManager';
+import { MintRequestManager } from './MintRequestManager';
 import { AdminBidManagement } from './AdminBidManagement';
+import { BlockchainAdminPanel } from './BlockchainAdminPanel';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -86,11 +89,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       const network = await provider.getNetwork();
       const networkId = Number(network.chainId);
       
-      if (networkId === 11155111) { // Ethereum Sepolia
-        setNetworkName('Ethereum Sepolia');
+      if (networkId === 84532) { // Base Sepolia
+        setNetworkName('Base Sepolia');
         setIsSepolia(true);
-      } else if (networkId === 1) { // Ethereum Mainnet
-        setNetworkName('Ethereum Mainnet');
+      } else if (networkId === 8453) { // Base Mainnet
+        setNetworkName('Base Mainnet');
         setIsSepolia(false);
       } else {
         setNetworkName(`Network ID: ${networkId}`);
@@ -462,7 +465,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gradient-card border border-nft-border">
+          <TabsList className="grid w-full grid-cols-8 bg-gradient-card border border-nft-border">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Overview
             </TabsTrigger>
@@ -477,6 +480,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             </TabsTrigger>
             <TabsTrigger value="bids" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Bid Management
+            </TabsTrigger>
+            <TabsTrigger value="blockchain" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Blockchain
+            </TabsTrigger>
+            <TabsTrigger value="minting" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              NFT Minting
             </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Settings
@@ -603,6 +612,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Admin Actions */}
+                <div className="p-4 bg-background/50 rounded-lg border border-nft-border">
+                  <h4 className="font-medium text-white mb-3">Admin Actions</h4>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to reset all NFT data? This will restore all sold NFTs back to available status.')) {
+                          resetNFTs();
+                          toast({
+                            title: "Data Reset",
+                            description: "All NFT data has been reset to original state.",
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                    >
+                      Reset NFT Data
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    This will reset all sold NFTs back to available status for testing purposes.
+                  </p>
+                </div>
                 {/* Wallet Status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-4 bg-background/50 rounded-lg border border-nft-border">
@@ -657,7 +691,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                       <p className="text-2xl font-bold text-green-400">
                         {isSepolia ? '✓' : '✗'}
                       </p>
-                      <p className="text-muted-foreground">Sepolia Network</p>
+                      <p className="text-muted-foreground">Base Sepolia Network</p>
                     </div>
                     <div className="text-center p-4 bg-gradient-hero/20 rounded-lg">
                       <p className="text-2xl font-bold text-blue-400">
@@ -680,9 +714,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   <Button 
                     variant="outline" 
                     className="border-nft-border text-muted-foreground hover:bg-background"
-                    onClick={() => window.open('https://sepolia.etherscan.io/', '_blank')}
+                    onClick={() => window.open('https://sepolia.basescan.org/', '_blank')}
                   >
-                    View on Etherscan
+                    View on BaseScan
                   </Button>
                 </div>
               </CardContent>
@@ -1151,6 +1185,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
                      {/* Auctions Tab */}
            <TabsContent value="auctions" className="space-y-6">
+             {/* Live Auction Manager */}
+             <AuctionManager />
+             
              <div className="flex items-center justify-between">
                <h2 className="text-2xl font-bold text-white">Auction Management</h2>
                <Button 
@@ -1295,6 +1332,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           {/* Bid Management Tab */}
           <TabsContent value="bids" className="space-y-6">
             <AdminBidManagement />
+          </TabsContent>
+
+          {/* Blockchain Tab */}
+          <TabsContent value="blockchain" className="space-y-6">
+            <BlockchainAdminPanel />
+          </TabsContent>
+
+          {/* NFT Minting Tab */}
+          <TabsContent value="minting" className="space-y-6">
+            <MintRequestManager />
           </TabsContent>
 
           {/* Settings Tab */}

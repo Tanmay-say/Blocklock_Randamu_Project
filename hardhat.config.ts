@@ -23,10 +23,20 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
       chainId: 1337,
     },
-    // Only add sepolia network if environment variables are present
-    ...(process.env.PRIVATE_KEY && process.env.RPC_URL && {
+    // Base Sepolia (Primary testnet for Blocklock)
+    ...(process.env.PRIVATE_KEY && {
+      "base-sepolia": {
+        url: process.env.RPC_URL || "https://sepolia.base.org",
+        accounts: [process.env.PRIVATE_KEY],
+        chainId: 84532,
+        gasPrice: 1000000000, // 1 gwei
+        gas: 3000000,
+      },
+    }),
+    // Regular Sepolia (backup)
+    ...(process.env.PRIVATE_KEY && process.env.SEPOLIA_RPC_URL && {
       sepolia: {
-        url: process.env.RPC_URL,
+        url: process.env.SEPOLIA_RPC_URL,
         accounts: [process.env.PRIVATE_KEY],
         chainId: 11155111,
       },
@@ -34,8 +44,19 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      "base-sepolia": process.env.BASESCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
     },
+    customChains: [
+      {
+        network: "base-sepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org/"
+        }
+      }
+    ]
   },
   paths: {
     sources: "./contracts",

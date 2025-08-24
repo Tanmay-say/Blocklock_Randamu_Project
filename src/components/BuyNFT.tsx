@@ -9,13 +9,15 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from '@/contexts/WalletContext';
 import { useNFT } from '@/contexts/NFTContext';
+import { getContract, LOCAL_CONTRACT_ADDRESSES } from '@/lib/contracts';
+import { ethers } from 'ethers';
 import { ArrowLeft, ShoppingCart, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 export const BuyNFT: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isConnected, account } = useWallet();
+  const { isConnected, account, signer, chainId } = useWallet();
   const { getNFTById, updateNFT } = useNFT();
   
   const [nft, setNft] = useState<any>(null);
@@ -39,36 +41,165 @@ export const BuyNFT: React.FC = () => {
   }, [id, getNFTById]);
 
   const handlePurchase = async () => {
-    if (!nft || !isConnected || !account) return;
+    if (!nft || !isConnected || !account || !signer) {
+      setError('Please connect your wallet to purchase this NFT.');
+      return;
+    }
+
+    // Check if on correct network
+    if (chainId !== 84532) {
+      setError('Please switch to Base Sepolia network to purchase NFTs.');
+      return;
+    }
 
     setIsPurchasing(true);
     setError('');
 
     try {
-      // Simulate purchase transaction
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Check if user has enough balance
+      const balance = await signer.provider!.getBalance(account);
+      const priceInWei = ethers.parseEther(nft.price.toString());
+      
+      if (balance < priceInWei) {
+        throw new Error(`Insufficient balance. You need ${nft.price} ETH but only have ${ethers.formatEther(balance)} ETH.`);
+      }
 
-      // Update NFT status to sold
-      updateNFT(nft.id, { 
-        status: 'sold',
-        owner: account 
+      // Simple marketplace: Send full amount to admin wallet (marketplace owner)
+      // In a real marketplace, this would be split between seller and platform
+      const ADMIN_WALLET = "0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC";
+      
+      console.log('Purchase details:');
+      console.log('Buyer:', account);
+      console.log('NFT:', nft.name);
+      console.log('Price:', nft.price, 'ETH');
+      console.log('Admin wallet:', ADMIN_WALLET);
+      
+      // Send payment to admin wallet
+      console.log('Sending payment to admin wallet...');
+      const tx = await signer.sendTransaction({
+        to: ADMIN_WALLET,
+        value: priceInWei,
+        gasLimit: 25000 // Increased gas limit for safety
       });
 
       toast({
-        title: "Purchase Successful!",
-        description: `You have successfully purchased ${nft.name} for ${nft.price} ETH.`,
+        title: "Transaction Submitted",
+        description: `Purchasing ${nft.name} for ${nft.price} ETH. Transaction: ${tx.hash}`,
       });
+
+      console.log('Purchase transaction submitted:', tx.hash);
+
+      // Wait for transaction confirmation
+      console.log('Waiting for transaction confirmation...');
+      const receipt = await tx.wait();
+      
+      console.log('Transaction receipt:', receipt);
+      
+      if (receipt && receipt.status === 1) {
+        // Transaction successful - now mint NFT to buyer
+        console.log('Payment confirmed, minting NFT to buyer...');
+        
+        // Try to mint real NFT to buyer
+        console.log('Payment confirmed, attempting to mint NFT to buyer...');
+        
+        let nftMinted = false;
+        let tokenId = null;
+        
+        // For now, we'll create a mint request that can be processed by admin
+        console.log('Creating NFT mint request for admin processing...');
+        
+        const mintRequest = {
+          buyer: account,
+          nft: {
+            name: nft.name,
+            description: nft.description,
+            image: nft.image,
+            attributes: nft.attributes || []
+          },
+          purchaseTransaction: tx.hash,
+          purchasePrice: nft.price,
+          purchaseDate: new Date().toISOString(),
+          marketplaceId: nft.id
+        };
+        
+        // Store mint request in localStorage for admin to process
+        const existingRequests = JSON.parse(localStorage.getItem('nft-mint-requests') || '[]');
+        existingRequests.push(mintRequest);
+        localStorage.setItem('nft-mint-requests', JSON.stringify(existingRequests));
+        
+        console.log('Mint request created:', mintRequest);
+        
+        // For demo purposes, simulate successful minting
+        // In production, admin would process these requests
+        nftMinted = false; // Will be true once admin processes the request
+        
+        // Update NFT status in our local system
+        console.log('Updating local NFT status...');
+        
+        updateNFT(nft.id, { 
+          status: 'sold',
+          owner: account,
+          transactionHash: tx.hash
+        });
+
+        // Add suggestion to import NFT to MetaMask
+        const addToMetaMask = async () => {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_watchAsset',
+              params: {
+                type: 'ERC721',
+                options: {
+                  address: LOCAL_CONTRACT_ADDRESSES.testNFT,
+                  tokenId: '', // We'd need the actual token ID from the mint receipt
+                },
+              },
+            });
+          } catch (error) {
+            console.log('User declined or error occurred');
+          }
+        };
+
+        toast({
+          title: "Purchase Successful!",
+          description: nftMinted 
+            ? `You have successfully purchased ${nft.name} for ${nft.price} ETH. Real NFT minted to your wallet! Check MetaMask NFTs tab.`
+            : `You have successfully purchased ${nft.name} for ${nft.price} ETH. Digital ownership recorded! Check your Profile to see your NFTs.`,
+        });
+
+        console.log('Purchase completed successfully:', tx.hash);
+        console.log('NFT updated in local state');
 
       // Navigate back to marketplace after success
       setTimeout(() => {
         navigate('/nfts');
-      }, 2000);
+        }, 3000);
+      } else {
+        console.error('Transaction failed with receipt:', receipt);
+        throw new Error(`Transaction failed. Status: ${receipt?.status || 'unknown'}`);
+      }
 
-    } catch (error) {
-      setError('Purchase failed. Please try again.');
+    } catch (error: any) {
+      console.error('Purchase failed:', error);
+      
+      let errorMessage = 'Purchase failed. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds for transaction.';
+        } else if (error.message.includes('user rejected')) {
+          errorMessage = 'Transaction cancelled by user.';
+        } else if (error.message.includes('Insufficient balance')) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = `Transaction failed: ${error.message}`;
+        }
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Purchase Failed",
-        description: "There was an error processing your purchase.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -214,6 +345,13 @@ export const BuyNFT: React.FC = () => {
                     <AlertCircle className="h-4 w-4 text-yellow-400" />
                     <AlertDescription className="text-yellow-400">
                       Please connect your wallet to purchase this NFT.
+                    </AlertDescription>
+                  </Alert>
+                ) : chainId !== 84532 ? (
+                  <Alert className="border-red-500/30 bg-red-500/10">
+                    <AlertCircle className="h-4 w-4 text-red-400" />
+                    <AlertDescription className="text-red-400">
+                      Please switch to Base Sepolia network to purchase NFTs.
                     </AlertDescription>
                   </Alert>
                 ) : nft.status !== 'available' ? (

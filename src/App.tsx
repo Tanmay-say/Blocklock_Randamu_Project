@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { NFTProvider } from "@/contexts/NFTContext";
+import { BlockchainProvider } from "@/contexts/BlockchainContext";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import About from "./pages/About";
@@ -24,9 +25,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WalletProvider>
-      <AdminProvider>
-        <NFTProvider>
-          <TooltipProvider>
+      <BlockchainProvider>
+        <AdminProvider>
+          <NFTProvider>
+            <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -49,6 +51,7 @@ const App = () => (
           </TooltipProvider>
         </NFTProvider>
       </AdminProvider>
+    </BlockchainProvider>
     </WalletProvider>
   </QueryClientProvider>
 );

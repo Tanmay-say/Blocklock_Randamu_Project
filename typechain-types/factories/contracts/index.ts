@@ -4,5 +4,6 @@
 export * as interfaces from "./interfaces";
 export { AuctionHouse__factory } from "./AuctionHouse__factory";
 export { MockRandamuVRF__factory } from "./MockRandamuVRF__factory";
+export { SimpleMarketplace__factory } from "./SimpleMarketplace__factory";
 export { TestNFT__factory } from "./TestNFT__factory";
 export { WinnerSBT__factory } from "./WinnerSBT__factory";

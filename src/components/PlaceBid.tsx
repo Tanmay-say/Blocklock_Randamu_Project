@@ -11,13 +11,14 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from '@/contexts/WalletContext';
 import { useNFT } from '@/contexts/NFTContext';
+import { ethers } from 'ethers';
 import { AuctionCountdown } from './AuctionCountdown';
 import { ArrowLeft, Clock, Users, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const PlaceBid: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isConnected, account, signer } = useWallet();
+  const { isConnected, account, signer, chainId } = useWallet();
   const { getNFTById, placeBid, hasUserBidOnNFT } = useNFT();
   
   const [nft, setNft] = useState<any>(null);
@@ -98,36 +99,86 @@ export const PlaceBid: React.FC = () => {
     setSuccess('');
 
     try {
-      // Here you would integrate with your smart contract
-      // For now, we'll simulate the process
+      // Check if on correct network
+      if (chainId !== 84532) {
+        setError('Please switch to Base Sepolia network to place bids.');
+        return;
+      }
+
+      if (!signer) {
+        setError('Please connect your wallet to place a bid.');
+        return;
+      }
+
+      // Check if user has enough balance
+      const balance = await signer.provider!.getBalance(account);
+      const bidWei = ethers.parseEther(bidValue.toString());
       
-      // Simulate blockchain transaction
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (balance < bidWei) {
+        setError(`Insufficient balance. You need ${bidValue} ETH but only have ${ethers.formatEther(balance)} ETH.`);
+        return;
+      }
+
+      // For auction bids, send ETH to admin wallet as escrow
+      const ADMIN_WALLET = "0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC";
       
-      // Simulate transaction hash
-      const mockTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+      console.log('Placing bid:');
+      console.log('Bidder:', account);
+      console.log('NFT:', nft.name);
+      console.log('Bid amount:', bidValue, 'ETH');
+      console.log('Admin wallet (escrow):', ADMIN_WALLET);
       
-      // Place the bid in our system
-      placeBid(nft.id, account!, bidValue, mockTxHash);
+      // Send bid amount to admin wallet as escrow
+      console.log('Sending bid to escrow...');
+      const tx = await signer.sendTransaction({
+        to: ADMIN_WALLET,
+        value: bidWei,
+        gasLimit: 25000
+      });
+
+      console.log('Bid transaction submitted:', tx.hash);
       
-      // Update local NFT data
-      const updatedNFT = getNFTById(nft.id);
-      if (updatedNFT) {
-        setNft(updatedNFT);
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      
+      if (receipt && receipt.status === 1) {
+        console.log('Bid transaction confirmed');
+        
+        // Place the bid in our system with real transaction hash
+        placeBid(nft.id, account!, bidValue, tx.hash);
+        
+        // Update local NFT data
+        const updatedNFT = getNFTById(nft.id);
+        if (updatedNFT) {
+          setNft(updatedNFT);
+        }
+        
+        setSuccess(`Bid of ${bidValue} ETH placed successfully! Transaction: ${tx.hash.slice(0, 10)}...`);
+        
+        // Reset form to next increment
+        setBidAmount((bidValue * 1.05).toFixed(4)); // 5% increment for next bid
+        
+        console.log('Bid placed successfully');
+      } else {
+        throw new Error(`Transaction failed. Status: ${receipt?.status || 'unknown'}`);
       }
       
-      setSuccess(`Bid of ${bidValue} ETH placed successfully! Transaction: ${mockTxHash.slice(0, 10)}...`);
-      
-      // Reset form to next increment
-      setBidAmount((bidValue * 1.05).toFixed(4)); // 5% increment for next bid
-      
-      // In a real implementation, you would:
-      // 1. Call the smart contract's commitBid function
-      // 2. Handle the transaction response
-      // 3. Update the UI accordingly
-      
     } catch (err: any) {
-      setError(err.message || 'Failed to place bid. Please try again.');
+      console.error('Bid placement failed:', err);
+      
+      let errorMessage = 'Failed to place bid. Please try again.';
+      
+      if (err.message) {
+        if (err.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds for transaction.';
+        } else if (err.message.includes('user rejected')) {
+          errorMessage = 'Transaction cancelled by user.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

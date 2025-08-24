@@ -10,35 +10,34 @@ interface WalletContextType {
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   switchNetwork: (chainId: number) => Promise<void>;
+  switchToBaseSepolia: () => Promise<void>;
   provider: ethers.BrowserProvider | null;
   signer: ethers.JsonRpcSigner | null;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-// Ethereum Sepolia network configuration
-const ETHEREUM_SEPOLIA = {
-  chainId: '0xAA36A7', // 11155111 in hex
-  chainName: 'Sepolia',
+// Base Sepolia network configuration
+const BASE_SEPOLIA = {
+  chainId: '0x14A34', // 84532 in hex
+  chainName: 'Base Sepolia',
   nativeCurrency: {
     name: 'ETH',
     symbol: 'ETH',
     decimals: 18,
   },
-  rpcUrls: ['https://sepolia.infura.io/v3/your-project-id'],
-  blockExplorerUrls: ['https://sepolia.etherscan.io'],
+  rpcUrls: ['https://sepolia.base.org'],
+  blockExplorerUrls: ['https://sepolia.basescan.org'],
 };
 
-// Admin addresses (you can add more)
+// Admin addresses (actual deployed admin)
 const ADMIN_ADDRESSES = [
-  '0x1234567890123456789012345678901234567890', // Replace with actual admin addresses
-  // Add your actual admin wallet address here
-  // For testing, you can temporarily add any address you want to test with
+  '0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC', // Deployed admin wallet
 ];
 
-// Seller addresses (you can add more)
+// Seller addresses (actual deployed seller)
 const SELLER_ADDRESSES = [
-  '0x1234567890123456789012345678901234567890', // Replace with actual seller addresses
+  '0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC', // Deployed seller wallet
 ];
 
 export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -70,16 +69,24 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         await handleAccountsChanged(accounts);
         
-        // Check and switch to Ethereum Sepolia if needed
+        // Check current network
         const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-        if (currentChainId !== ETHEREUM_SEPOLIA.chainId) {
-          await switchNetwork(11155111);
+        console.log('Current Chain ID:', currentChainId);
+        console.log('Target Chain ID:', BASE_SEPOLIA.chainId);
+        
+        // Force switch to Base Sepolia if not already on it
+        if (currentChainId !== BASE_SEPOLIA.chainId) {
+          console.log('Switching to Base Sepolia...');
+          await switchToBaseSepolia();
+        } else {
+          console.log('Already on Base Sepolia');
         }
       } else {
-        alert('Please install MetaMask!');
+        alert('Please install MetaMask or another Ethereum wallet!');
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
+      alert('Error connecting wallet. Please try again.');
     }
   };
 
@@ -93,32 +100,50 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setSigner(null);
   };
 
-  const switchNetwork = async (targetChainId: number) => {
+  const switchToBaseSepolia = async () => {
     try {
       if (typeof window.ethereum !== 'undefined') {
-        const targetChainIdHex = '0x' + targetChainId.toString(16);
+        console.log('Attempting to switch to Base Sepolia...');
         
         try {
+          // First try to switch to Base Sepolia
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: targetChainIdHex }],
+            params: [{ chainId: BASE_SEPOLIA.chainId }],
           });
+          console.log('Successfully switched to Base Sepolia');
         } catch (switchError: any) {
-          // This error code indicates that the chain has not been added to MetaMask
+          console.log('Switch error:', switchError);
+          
+          // If Base Sepolia is not added to MetaMask, add it
           if (switchError.code === 4902) {
+            console.log('Base Sepolia not found, adding network...');
             try {
               await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
-                params: [ETHEREUM_SEPOLIA],
+                params: [BASE_SEPOLIA],
               });
+              console.log('Successfully added Base Sepolia network');
             } catch (addError) {
-              console.error('Error adding network:', addError);
+              console.error('Error adding Base Sepolia network:', addError);
+              alert('Failed to add Base Sepolia network. Please add it manually in MetaMask.');
             }
+          } else {
+            console.error('Error switching to Base Sepolia:', switchError);
+            alert('Failed to switch to Base Sepolia. Please switch manually in MetaMask.');
           }
         }
       }
     } catch (error) {
-      console.error('Error switching network:', error);
+      console.error('Error in switchToBaseSepolia:', error);
+    }
+  };
+
+  const switchNetwork = async (targetChainId: number) => {
+    if (targetChainId === 84532) {
+      await switchToBaseSepolia();
+    } else {
+      console.log('Unsupported network requested:', targetChainId);
     }
   };
 
@@ -148,7 +173,22 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const handleChainChanged = (chainId: string) => {
-    setChainId(parseInt(chainId, 16));
+    const newChainId = parseInt(chainId, 16);
+    setChainId(newChainId);
+    
+    console.log('Network changed to:', newChainId);
+    
+    // If user switches away from Base Sepolia, prompt them to switch back
+    if (newChainId !== 84532 && isConnected) {
+      console.log('User switched away from Base Sepolia, prompting to switch back...');
+      
+      // Small delay to ensure UI updates
+      setTimeout(() => {
+        if (confirm('This app requires Base Sepolia network. Would you like to switch back to Base Sepolia?')) {
+          switchToBaseSepolia();
+        }
+      }, 1000);
+    }
   };
 
   useEffect(() => {
@@ -174,6 +214,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     connectWallet,
     disconnectWallet,
     switchNetwork,
+    switchToBaseSepolia,
     provider,
     signer,
   };

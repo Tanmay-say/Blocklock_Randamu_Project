@@ -7,31 +7,51 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNFT } from '@/contexts/NFTContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { Search, Filter, Grid3X3, List } from 'lucide-react';
 
 export const NFTs: React.FC = () => {
   const { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } = useNFT();
+  const { account } = useWallet();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [collectionFilter, setCollectionFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Get unique collections and tags for filters
+  // Filter NFTs for marketplace display (hide sold NFTs unless owned by user)
+  const marketplaceNFTs = useMemo(() => {
+    return nfts.filter(nft => {
+      // Show all available and auction NFTs
+      if (nft.status === 'available' || nft.status === 'auction') {
+        return true;
+      }
+      
+      // For sold NFTs, only show to the owner
+      if (nft.status === 'sold' && account) {
+        return nft.owner?.toLowerCase() === account.toLowerCase();
+      }
+      
+      // Hide all other sold NFTs
+      return false;
+    });
+  }, [nfts, account]);
+
+  // Get unique collections and tags for filters (from marketplace NFTs)
   const collections = useMemo(() => {
-    const uniqueCollections = [...new Set(nfts.map(nft => nft.collection))];
+    const uniqueCollections = [...new Set(marketplaceNFTs.map(nft => nft.collection))];
     return uniqueCollections;
-  }, [nfts]);
+  }, [marketplaceNFTs]);
 
   const tags = useMemo(() => {
-    const allTags = nfts.flatMap(nft => nft.tags);
+    const allTags = marketplaceNFTs.flatMap(nft => nft.tags);
     const uniqueTags = [...new Set(allTags)];
     return uniqueTags;
-  }, [nfts]);
+  }, [marketplaceNFTs]);
 
   // Filter NFTs based on search and filters
   const filteredNFTs = useMemo(() => {
-    let filtered = nfts;
+    let filtered = marketplaceNFTs;
 
     // Status filter
     if (statusFilter !== 'all') {
@@ -59,7 +79,7 @@ export const NFTs: React.FC = () => {
     }
 
     return filtered;
-  }, [nfts, searchTerm, statusFilter, collectionFilter, tagFilter]);
+  }, [marketplaceNFTs, searchTerm, statusFilter, collectionFilter, tagFilter]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -69,7 +89,7 @@ export const NFTs: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return nfts.filter(nft => nft.status === status).length;
+    return marketplaceNFTs.filter(nft => nft.status === status).length;
   };
 
   return (
@@ -205,7 +225,7 @@ export const NFTs: React.FC = () => {
                 : 'border-green-600 text-green-400 hover:bg-green-600/10'
               }
             >
-              Available ({nfts.filter(nft => nft.status === 'available').length})
+              Available ({marketplaceNFTs.filter(nft => nft.status === 'available').length})
             </Button>
             <Button
               variant={statusFilter === 'auction' ? 'default' : 'outline'}
@@ -216,7 +236,7 @@ export const NFTs: React.FC = () => {
                 : 'border-primary text-primary hover:bg-primary/10'
               }
             >
-              Auction ({nfts.filter(nft => nft.status === 'auction').length})
+              Auction ({marketplaceNFTs.filter(nft => nft.status === 'auction').length})
             </Button>
             <Button
               variant={statusFilter === 'sold' ? 'default' : 'outline'}
@@ -227,7 +247,7 @@ export const NFTs: React.FC = () => {
                 : 'border-red-600 text-red-400 hover:bg-red-600/10'
               }
             >
-              Sold ({nfts.filter(nft => nft.status === 'sold').length})
+              Sold ({marketplaceNFTs.filter(nft => nft.status === 'sold').length})
             </Button>
             <Button
               variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -238,7 +258,7 @@ export const NFTs: React.FC = () => {
                 : 'border-gray-600 text-gray-400 hover:bg-gray-600/10'
               }
             >
-              All ({nfts.length})
+              All ({marketplaceNFTs.length})
             </Button>
           </div>
 
@@ -246,7 +266,7 @@ export const NFTs: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <span className="text-muted-foreground">
-                Showing {filteredNFTs.length} of {nfts.length} NFTs
+                Showing {filteredNFTs.length} of {marketplaceNFTs.length} NFTs
               </span>
               {(statusFilter !== 'all' || collectionFilter !== 'all' || tagFilter !== 'all' || searchTerm) && (
                 <div className="flex items-center gap-2">

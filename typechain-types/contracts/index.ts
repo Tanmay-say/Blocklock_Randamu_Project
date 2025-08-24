@@ -5,5 +5,6 @@ import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { AuctionHouse } from "./AuctionHouse";
 export type { MockRandamuVRF } from "./MockRandamuVRF";
+export type { SimpleMarketplace } from "./SimpleMarketplace";
 export type { TestNFT } from "./TestNFT";
 export type { WinnerSBT } from "./WinnerSBT";

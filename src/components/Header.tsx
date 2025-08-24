@@ -14,7 +14,7 @@ import {
 
 export const Header = () => {
   const location = useLocation();
-  const { account, isConnected, isAdmin, connectWallet, disconnectWallet } = useWallet();
+  const { account, isConnected, isAdmin, chainId, connectWallet, disconnectWallet, switchToBaseSepolia } = useWallet();
   const { isAdminAuthenticated } = useAdmin();
   
   const isActive = (path: string) => location.pathname === path;
@@ -95,34 +95,69 @@ export const Header = () => {
       
       <div className="flex items-center gap-4">
         {isConnected ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                <Wallet className="w-4 h-4 mr-2" />
-                {formatAddress(account!)}
+          <div className="flex items-center gap-2">
+            {/* Network Status Indicator */}
+            {chainId !== 84532 && (
+              <Button 
+                onClick={switchToBaseSepolia}
+                variant="destructive"
+                size="sm"
+                className="text-xs"
+              >
+                Wrong Network
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="cursor-pointer">
-                <Wallet className="w-4 h-4 mr-2" />
-                {account}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {isAdminAuthenticated && (
-                <DropdownMenuItem asChild>
-                  <Link to="/admin" className="cursor-pointer">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Admin Panel
-                  </Link>
+            )}
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Wallet className="w-4 h-4 mr-2" />
+                  {formatAddress(account!)}
+                  {chainId === 84532 ? (
+                    <span className="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>
+                  ) : (
+                    <span className="ml-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {/* Network Status */}
+                <DropdownMenuItem className="cursor-default">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Network:</span>
+                    <span className={`text-sm ${chainId === 84532 ? 'text-green-600' : 'text-red-600'}`}>
+                      {chainId === 84532 ? 'Base Sepolia ✓' : `Chain ${chainId} ✗`}
+                    </span>
+                  </div>
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={disconnectWallet} className="cursor-pointer text-red-600">
-                <LogOut className="w-4 h-4 mr-2" />
-                Disconnect
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {chainId !== 84532 && (
+                  <DropdownMenuItem onClick={switchToBaseSepolia} className="cursor-pointer text-blue-600">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Switch to Base Sepolia
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <Wallet className="w-4 h-4 mr-2" />
+                  {account}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {isAdminAuthenticated && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="cursor-pointer">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Admin Panel
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={disconnectWallet} className="cursor-pointer text-red-600">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Disconnect
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ) : (
           <Button 
             onClick={connectWallet}

@@ -7,6 +7,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { User, Trophy, Clock, ExternalLink, Crown, ShoppingBag } from 'lucide-react';
 import { AuctionCountdown } from './AuctionCountdown';
+import { MetaMaskNFTGuide } from './MetaMaskNFTGuide';
 
 export const UserProfile: React.FC = () => {
   const { account, isConnected, balance } = useWallet();
@@ -137,6 +138,11 @@ export const UserProfile: React.FC = () => {
           </Card>
         </div>
 
+        {/* MetaMask NFT Guide */}
+        <div className="mb-8">
+          <MetaMaskNFTGuide />
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Active Bids */}
           <Card className="bg-gradient-card border-nft-border">
@@ -194,7 +200,7 @@ export const UserProfile: React.FC = () => {
                             size="sm"
                             variant="outline"
                             className="border-nft-border text-muted-foreground hover:bg-background/50"
-                            onClick={() => window.open(`https://sepolia.etherscan.io/tx/${bid.transactionHash}`, '_blank')}
+                            onClick={() => window.open(`https://sepolia.basescan.org/tx/${bid.transactionHash}`, '_blank')}
                           >
                             <ExternalLink className="w-4 h-4" />
                           </Button>
@@ -261,7 +267,7 @@ export const UserProfile: React.FC = () => {
                             size="sm"
                             variant="outline"
                             className="border-nft-border text-muted-foreground hover:bg-background/50"
-                            onClick={() => window.open(`https://sepolia.etherscan.io/tx/${bid.transactionHash}`, '_blank')}
+                            onClick={() => window.open(`https://sepolia.basescan.org/tx/${bid.transactionHash}`, '_blank')}
                           >
                             <ExternalLink className="w-4 h-4" />
                           </Button>
@@ -292,6 +298,7 @@ export const UserProfile: React.FC = () => {
               ) : (
                 ownedNFTs.slice(0, 10).map((nft) => {
                   const acquisitionMethod = nft.winner === account ? 'Won Auction' : 'Direct Purchase';
+                  const paidAmount = nft.highestBid?.amount || nft.price;
                   
                   return (
                     <div key={nft.id} className="p-4 bg-background/30 rounded-lg border border-nft-border">
@@ -305,7 +312,7 @@ export const UserProfile: React.FC = () => {
                           <h4 className="text-white font-semibold">{nft.name}</h4>
                           <div className="flex items-center gap-4 mt-1">
                             <span className="text-sm text-muted-foreground">
-                              Paid: {nft.highestBid?.amount || nft.price} ETH
+                              Paid: {paidAmount} ETH
                             </span>
                             <Badge className={
                               acquisitionMethod === 'Won Auction' 
@@ -328,6 +335,19 @@ export const UserProfile: React.FC = () => {
                           <div className="text-xs text-muted-foreground mt-1">
                             Collection: {nft.collection}
                           </div>
+                          {/* Transaction Hash */}
+                          {nft.transactionHash && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              <span className="font-mono">Purchase Tx: {nft.transactionHash.slice(0, 8)}...{nft.transactionHash.slice(-6)}</span>
+                            </div>
+                          )}
+                          
+                          {/* Minting Status */}
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="text-xs text-orange-400">
+                              🎨 NFT Minting: Pending Admin Processing
+                            </div>
+                          </div>
                           <div className="flex flex-wrap gap-1 mt-2">
                             {nft.tags.slice(0, 3).map((tag, index) => (
                               <Badge key={index} variant="outline" className="text-xs border-nft-border text-muted-foreground">
@@ -336,11 +356,24 @@ export const UserProfile: React.FC = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-white">Owned</div>
-                          <div className="text-xs text-muted-foreground">
-                            {nft.status === 'sold' ? 'Purchased' : 'Acquired'}
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-white">Owned</div>
+                            <div className="text-xs text-muted-foreground">
+                              {nft.status === 'sold' ? 'Purchased' : 'Acquired'}
+                            </div>
                           </div>
+                          {/* Transaction Link */}
+                          {nft.transactionHash && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-nft-border text-muted-foreground hover:bg-background/50"
+                              onClick={() => window.open(`https://sepolia.basescan.org/tx/${nft.transactionHash}`, '_blank')}
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "D:\\NGT market\\contracts\\AuctionHouse.sol": {
-      "lastModificationDate": 1755658409259,
-      "contentHash": "2cdfb46f104b1ff9035a2f9dbcb02e6a",
+      "lastModificationDate": 1756054288028,
+      "contentHash": "5935516f86f91a77475d470e70dbd5f2",
       "sourceName": "contracts/AuctionHouse.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -34,8 +34,8 @@
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "@openzeppelin/contracts/token/ERC721/IERC721.sol",
         "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "./interfaces/IBlocklockReceiver.sol",
+        "blocklock-solidity/src/libraries/TypesLib.sol",
+        "blocklock-solidity/src/AbstractBlocklockReceiver.sol",
         "./interfaces/IRandamuVRF.sol",
         "./WinnerSBT.sol"
       ],
@@ -916,8 +916,8 @@
       ]
     },
     "D:\\NGT market\\contracts\\TestNFT.sol": {
-      "lastModificationDate": 1755658290867,
-      "contentHash": "108715d94f3662885c0532b42808a4a4",
+      "lastModificationDate": 1756060806763,
+      "contentHash": "045c1b393b8c8bf78a55a0328c61d66a",
       "sourceName": "contracts/TestNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -990,6 +990,461 @@
       ],
       "artifacts": [
         "MockRandamuVRF"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\AbstractBlocklockReceiver.sol": {
+      "lastModificationDate": 1756054141844,
+      "contentHash": "bd1d7ecd6c0712c5d407bfde3f6f09df",
+      "sourceName": "blocklock-solidity/src/AbstractBlocklockReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IBlocklockReceiver.sol",
+        "./interfaces/IBlocklockSender.sol",
+        "./access/ConfirmedOwner.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "AbstractBlocklockReceiver"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\libraries\\TypesLib.sol": {
+      "lastModificationDate": 1756054146224,
+      "contentHash": "22479b9a8e4f49ce32f97e5fb916031b",
+      "sourceName": "blocklock-solidity/src/libraries/TypesLib.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BLS.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "TypesLib"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IBlocklockReceiver.sol": {
+      "lastModificationDate": 1756054144399,
+      "contentHash": "a0401d06f5aaa6c619c6f1e00f9bbe31",
+      "sourceName": "blocklock-solidity/src/interfaces/IBlocklockReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "IBlocklockReceiver"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwner.sol": {
+      "lastModificationDate": 1756054142485,
+      "contentHash": "6b00df07c1d4647ddeeaa056beedc00e",
+      "sourceName": "blocklock-solidity/src/access/ConfirmedOwner.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ConfirmedOwnerWithProposal.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "ConfirmedOwner"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IBlocklockSender.sol": {
+      "lastModificationDate": 1756054144406,
+      "contentHash": "5e8898ba0d0704fbc4ff6eac8c3bacf3",
+      "sourceName": "blocklock-solidity/src/interfaces/IBlocklockSender.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/TypesLib.sol",
+        "./ISubscription.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "IBlocklockSender"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwnerWithProposal.sol": {
+      "lastModificationDate": 1756054142489,
+      "contentHash": "1b6acd09a7df85da300774db271f55b5",
+      "sourceName": "blocklock-solidity/src/access/ConfirmedOwnerWithProposal.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IOwnable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "ConfirmedOwnerWithProposal"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IOwnable.sol": {
+      "lastModificationDate": 1756054144811,
+      "contentHash": "c381d0ab8b97a2b25a7bbc6ad11445af",
+      "sourceName": "blocklock-solidity/src/interfaces/IOwnable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "IOwnable"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\ISubscription.sol": {
+      "lastModificationDate": 1756054144827,
+      "contentHash": "fae7a482c17bda4155834faf62f2e9d8",
+      "sourceName": "blocklock-solidity/src/interfaces/ISubscription.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "ISubscription"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\libraries\\BLS.sol": {
+      "lastModificationDate": 1756054142259,
+      "contentHash": "8ee4d432059d77a558cad9111ee3fe81",
+      "sourceName": "blocklock-solidity/src/libraries/BLS.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ModExp.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "BLS"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\libraries\\ModExp.sol": {
+      "lastModificationDate": 1756054144984,
+      "contentHash": "329aa110c9c1342f7523530a01a04846",
+      "sourceName": "blocklock-solidity/src/libraries/ModExp.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "ModUtils",
+        "ModexpInverse",
+        "ModexpSqrt"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Pausable.sol": {
+      "lastModificationDate": 1755627425151,
+      "contentHash": "0d47b53e10b1985efbb396f937626279",
+      "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Pausable"
+      ]
+    },
+    "D:\\NGT market\\contracts\\SimpleMarketplace.sol": {
+      "lastModificationDate": 1756060840655,
+      "contentHash": "61ff9c3efb2f395a20d32a667ad2ffb4",
+      "sourceName": "contracts/SimpleMarketplace.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "SimpleMarketplace"
       ]
     }
   }

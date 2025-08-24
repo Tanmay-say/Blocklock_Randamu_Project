@@ -21,7 +21,7 @@ contract TestNFT is ERC721, Ownable {
      * @param to The address to mint the token to
      * @param uri The URI for the token
      */
-    function mint(address to, string memory uri) external onlyOwner returns (uint256) {
+    function mint(address to, string memory uri) external returns (uint256) {
         uint256 tokenId = _tokenIds;
         _tokenIds++;
         _mint(to, tokenId);

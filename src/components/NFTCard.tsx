@@ -71,9 +71,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
           className="w-full aspect-square object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-3 right-3">
-          <Badge className={getStatusColor(nft.status)}>
-            {nft.status.charAt(0).toUpperCase() + nft.status.slice(1)}
-          </Badge>
+          {nft.status === 'sold' && account && nft.owner?.toLowerCase() === account.toLowerCase() ? (
+            <Badge className="bg-purple-900/20 text-purple-400 border border-purple-700/30">
+              You Own This
+            </Badge>
+          ) : (
+            <Badge className={getStatusColor(nft.status)}>
+              {nft.status.charAt(0).toUpperCase() + nft.status.slice(1)}
+            </Badge>
+          )}
         </div>
                             {nft.status === 'auction' && nft.currentBids && (
                       <div className="absolute top-3 left-3">
@@ -179,11 +185,18 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
             {/* Sold NFTs - Disabled Display Only */}
             {nft.status === 'sold' && (
               <Button 
-                className="w-full bg-gray-600 text-gray-300 cursor-not-allowed"
+                className={`w-full cursor-not-allowed ${
+                  account && nft.owner?.toLowerCase() === account.toLowerCase()
+                    ? 'bg-purple-600 text-white border-purple-500'
+                    : 'bg-gray-600 text-gray-300'
+                }`}
                 variant="outline"
                 disabled
               >
-                Sold Out
+                {account && nft.owner?.toLowerCase() === account.toLowerCase() 
+                  ? 'You Own This NFT' 
+                  : 'Sold Out'
+                }
               </Button>
             )}
           </>

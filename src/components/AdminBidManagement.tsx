@@ -232,7 +232,7 @@ export const AdminBidManagement: React.FC = () => {
                                     size="sm"
                                     variant="outline"
                                     className="border-nft-border text-muted-foreground hover:bg-background/50 mt-1"
-                                    onClick={() => window.open(`https://sepolia.etherscan.io/tx/${bid.transactionHash}`, '_blank')}
+                                    onClick={() => window.open(`https://sepolia.basescan.org/tx/${bid.transactionHash}`, '_blank')}
                                   >
                                     <ExternalLink className="w-3 h-3 mr-1" />
                                     Tx

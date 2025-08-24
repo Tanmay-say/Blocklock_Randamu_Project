@@ -1,214 +1,234 @@
-# 🚀 Tanmay's NFT Mart - Sealed-Bid Auction Marketplace
+# 🎯 NGT Auction Marketplace
 
-A modern, decentralized NFT marketplace featuring **sealed-bid auctions** with **Blocklock encryption** and **Randamu verifiable randomness**. Built with React, TypeScript, Solidity, and Hardhat.
+> **Sealed-Bid NFT Auction Platform with Blocklock Encryption on Base Sepolia**
 
-## ✨ Features
+A revolutionary NFT auction marketplace featuring sealed-bid auctions with automatic encryption/decryption using Blocklock technology, deployed on Base Sepolia testnet.
 
-- **🔐 Sealed-Bid Auctions** - Bids are encrypted until auction ends
-- **🔒 Blocklock Integration** - Time-locked encryption for bid privacy
-- **🎲 Verifiable Randomness** - Randamu VRF for tie-breaking
-- **🏆 Winner SBTs** - Soulbound tokens for auction winners (ERC-5192)
-- **👛 MetaMask Integration** - Seamless wallet connection
-- **👨‍💼 Admin Panel** - Comprehensive auction management
-- **🤖 GenAI Studio** - AI-powered content generation
-- **🌐 Ethereum Sepolia** - Built for Ethereum testnet
+## 🌟 Overview
 
-## 🏗️ Architecture
+This marketplace enables **truly private auctions** where bids are encrypted using Blocklock and automatically decrypted when the auction ends, ensuring fair and transparent sealed-bid auctions.
+
+### 🔥 Key Features
+
+- **🔒 Sealed-Bid Auctions** - Bids are encrypted with Blocklock until auction ends
+- **⚡ Automatic Decryption** - Blocklock automatically reveals bids when conditions are met
+- **💰 Revenue Model** - 20% tax on losing bidders + 100% of winning bids to admin
+- **🏆 Winner SBTs** - Non-transferable soulbound tokens for auction winners
+- **🎲 Fair Tie-Breaking** - Randamu VRF for random winner selection in ties
+- **⛽ Gas Optimized** - Optimized for Base network's low fees
+
+## 🚀 Live Deployment - Base Sepolia
+
+### 📋 Contract Addresses
+
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **🏛️ AuctionHouse** | [`0x6F8449Bb1E91970Ee39ECB3c71d7936e8e6d76Ba`](https://sepolia.basescan.org/address/0x6F8449Bb1E91970Ee39ECB3c71d7936e8e6d76Ba) | Main auction contract with Blocklock integration |
+| **🏆 WinnerSBT** | [`0x12C2c5C8d2175Bc1dD80cD8A1b590C996B3f47d0`](https://sepolia.basescan.org/address/0x12C2c5C8d2175Bc1dD80cD8A1b590C996B3f47d0) | Soulbound tokens for auction winners |
+| **🎨 TestNFT** | [`0x72ADEB4DE31E0C1D5Bd6b24c24C9ca11d6eD5705`](https://sepolia.basescan.org/address/0x72ADEB4DE31E0C1D5Bd6b24c24C9ca11d6eD5705) | ERC-721 tokens for auction testing |
+| **🎲 MockRandamuVRF** | [`0x15F508eAE92bee6e8d27b61C4A129ECF094e9aa3`](https://sepolia.basescan.org/address/0x15F508eAE92bee6e8d27b61C4A129ECF094e9aa3) | Verifiable randomness for tie-breaking |
+
+### 🌐 Network Information
+
+- **Network**: Base Sepolia Testnet
+- **Chain ID**: `84532`
+- **RPC URL**: `https://sepolia.base.org`
+- **Explorer**: https://sepolia.basescan.org
+- **Deployed**: August 24, 2025
+- **Deployer**: `0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC`
+
+### 🔗 External Integrations
+
+- **Blocklock Sender**: `0x82Fed730CbdeC5A2D8724F2e3b316a70A565e27e`
+- **Encryption**: AES-256-GCM with block-based decryption
+- **Randomness**: Randamu VRF for fair tie-breaking
+
+## 🎮 How It Works
+
+### 1. 🏗️ Auction Creation
+- Sellers list NFTs with reserve price and auction duration
+- 10-50% deposit required from bidders
+- Auction duration set in blocks (e.g., 100 blocks ≈ 3.3 minutes)
+
+### 2. 🔐 Encrypted Bidding
+- Bidders place encrypted bids using Blocklock
+- Bid amounts hidden until auction ends
+- Minimum deposit required (percentage of reserve price)
+
+### 3. ⏰ Automatic Decryption
+- Blocklock automatically decrypts bids when auction end block is reached
+- Highest valid bid wins the NFT
+- Transparent and tamper-proof process
+
+### 4. 💸 Settlement & Revenue
+- **Winner**: Receives NFT + Winner SBT
+- **Losing Bidders**: Pay 20% tax on their deposit
+- **Admin**: Receives winning bid amount + all taxes
+
+## 🛠️ Technical Architecture
 
 ### Smart Contracts
-- **`AuctionHouse.sol`** - Main auction logic with sealed-bid mechanics
-- **`WinnerSBT.sol`** - ERC-5192 soulbound tokens for winners
-- **`TestNFT.sol`** - ERC-721 tokens for testing
-- **`MockRandamuVRF.sol`** - Mock randomness for development
 
-### Frontend
-- **React 18** with TypeScript
-- **Tailwind CSS** with custom design system
-- **Shadcn/ui** components
-- **MetaMask** wallet integration
-- **Responsive design** for all devices
+```solidity
+// Main auction contract with Blocklock integration
+contract AuctionHouse is AbstractBlocklockReceiver {
+    // Sealed-bid auction with encrypted bids
+    // Automatic decryption via Blocklock callbacks
+    // 20% tax system for revenue generation
+}
+
+// Non-transferable winner certificates
+contract WinnerSBT is ERC721 {
+    // Soulbound tokens for auction winners
+    // SVG-based metadata with auction details
+}
+```
+
+### 🔧 Key Technologies
+
+- **Solidity ^0.8.24** - Smart contract development
+- **Blocklock** - Time-based encryption/decryption
+- **OpenZeppelin** - Security and standards
+- **Hardhat** - Development framework
+- **React + TypeScript** - Frontend interface
+- **Ethers.js** - Blockchain interaction
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- MetaMask wallet
-- Ethereum Sepolia testnet ETH
+
+- Node.js v16+
+- Base Sepolia ETH
+- MetaMask or compatible wallet
 
 ### 1. Clone & Install
+
 ```bash
 git clone <repository-url>
-cd nft-marketplace
+cd ngt-marketplace
 npm install
 ```
 
 ### 2. Environment Setup
+
 ```bash
-cp env.example .env
+cp env.local.template .env
+# Edit .env with your credentials
 ```
 
-Edit `.env` with your configuration:
-```env
-# Network Configuration
-RPC_URL=https://sepolia.infura.io/v3/your-project-id
-CHAIN_ID=11155111
+### 3. Add Base Sepolia to MetaMask
 
-# Deployer Account
-PRIVATE_KEY=your_private_key_here
+- **Network Name**: Base Sepolia Testnet
+- **RPC URL**: `https://sepolia.base.org`
+- **Chain ID**: `84532`
+- **Currency Symbol**: `ETH`
+- **Block Explorer**: `https://sepolia.basescan.org`
 
-# Etherscan API Keys
-ETHERSCAN_API_KEY=your_etherscan_api_key_here
-```
+### 4. Get Testnet ETH
 
-### 3. Compile Contracts
+- **Faucet**: https://www.alchemy.com/faucets/base-sepolia
+- **Bridge**: https://bridge.base.org/deposit
+
+### 5. Test the Platform
+
 ```bash
-npm run compile
-```
+# Run auction demo with Blocklock encryption
+npm run demo:auction
 
-### 4. Deploy to Local Network
-```bash
-# Start local Hardhat node
-npm run node
-
-# In new terminal, deploy contracts
-npm run deploy:local
-```
-
-### 5. Seed Test Data
-```bash
-npm run seed
-```
-
-### 6. Start Frontend
-```bash
+# Start frontend
 npm run dev
 ```
 
-Visit `http://localhost:8080` to see your marketplace!
+## 📱 Usage Examples
 
-## 🚀 Deployment
+### Creating an Auction
 
-### Ethereum Sepolia Testnet
-```bash
-npm run deploy:sepolia
+```javascript
+// Create auction for NFT
+await auctionHouse.createAuction(
+  nftAddress,      // NFT contract
+  tokenId,         // Token ID
+  reserve,         // Minimum bid (in wei)
+  endBlock,        // Auction end block
+  depositPct       // Required deposit %
+);
 ```
 
-### Mainnet (when ready)
-```bash
-npm run deploy:mainnet
+### Placing Encrypted Bids
+
+```javascript
+// Encrypt bid using Blocklock
+const encryptedBid = blocklock.encrypt(bidAmount, endBlock);
+
+// Submit encrypted bid
+await auctionHouse.commitBid(
+  auctionId,
+  encryptedBid,
+  condition,
+  callbackGasLimit,
+  { value: deposit }
+);
 ```
 
-## 📱 Usage
+### Automatic Settlement
 
-### For Users
-1. **Connect Wallet** - Click "Connect Wallet" to link MetaMask
-2. **Browse Collections** - View available NFTs and auctions
-3. **Place Bids** - Submit encrypted bids on active auctions
-4. **Track Status** - Monitor auction progress and results
-5. **Claim Prizes** - Winners receive NFTs and SBT badges
+- Blocklock automatically decrypts bids at end block
+- Contract determines winner and processes payments
+- Winner receives NFT + SBT certificate
 
-### For Admins
-1. **Access Admin Panel** - Available after connecting admin wallet
-2. **Create Auctions** - Set up new sealed-bid auctions
-3. **Manage Bids** - Process and reveal encrypted bids
-4. **Finalize Auctions** - Complete auctions and distribute prizes
-5. **Monitor System** - View analytics and system status
+## 💰 Revenue Model
 
-### GenAI Features
-1. **Image Generation** - Create AI art from text descriptions
-2. **Style Transfer** - Apply artistic styles to existing images
-3. **Text Generation** - Generate creative content with AI
+| Event | Revenue Stream | Amount |
+|-------|---------------|--------|
+| **Winning Bid** | Admin receives full amount | 100% |
+| **Losing Bids** | Tax on deposits | 20% |
+| **Platform** | Combined revenue | ~120-200% of reserve |
 
-## 🔧 Configuration
-
-### Admin Addresses
-Update admin addresses in `src/contexts/WalletContext.tsx`:
-```typescript
-const ADMIN_ADDRESSES = [
-  '0xYourAdminAddress1',
-  '0xYourAdminAddress2'
-];
-```
-
-### Network Configuration
-Modify network settings in `hardhat.config.ts`:
-```typescript
-networks: {
-  sepolia: {
-    url: process.env.RPC_URL,
-    accounts: [process.env.PRIVATE_KEY],
-    chainId: 11155111,
-  }
-}
-```
-
-## 🧪 Testing
-
-### Run Tests
-```bash
-npm test
-```
-
-### Test Specific Contracts
-```bash
-npx hardhat test test/AuctionHouse.spec.ts
-npx hardhat test test/WinnerSBT.spec.ts
-```
-
-### Local Testing
-```bash
-# Start local node
-npm run node
-
-# Deploy and test locally
-npm run deploy:local
-npm run seed
-```
-
-## 📊 Contract Addresses
-
-After deployment, contract addresses are saved to `deployment.json`:
-```json
-{
-  "network": "sepolia",
-  "contracts": {
-    "TestNFT": "0x...",
-    "WinnerSBT": "0x...",
-    "MockRandamuVRF": "0x...",
-    "AuctionHouse": "0x..."
-  }
-}
-```
+### Example: 1 ETH Reserve Auction
+- 5 bidders deposit 0.2 ETH each (20%)
+- Winner bids 1.5 ETH → Admin gets 1.5 ETH
+- 4 losers pay 0.04 ETH tax each → Admin gets 0.16 ETH
+- **Total Admin Revenue**: 1.66 ETH (111% of winning bid)
 
 ## 🔒 Security Features
 
-- **Reentrancy Protection** - Prevents reentrancy attacks
-- **Access Control** - Role-based permissions for admin functions
-- **Input Validation** - Comprehensive parameter checking
-- **Emergency Functions** - Admin controls for critical situations
-- **Encrypted Bids** - Bid amounts hidden until auction ends
+- **✅ Role-based Access Control** - Admin/Seller roles
+- **✅ Reentrancy Protection** - No recursive calls
+- **✅ Safe NFT Transfers** - ERC721Holder standard
+- **✅ Bid Privacy** - Blocklock encryption
+- **✅ Emergency Functions** - Admin recovery options
 
-## 🌐 Network Support
+## 🧪 Testing
 
-- **Ethereum Sepolia** - Primary testnet (Chain ID: 11155111)
-- **Local Hardhat** - Development and testing
-- **Ethereum Mainnet** - Production deployment (when ready)
+```bash
+# Run smart contract tests
+npm test
 
-## 📚 API Reference
+# Deploy to local network
+npm run node
+npm run deploy:local
 
-### Smart Contract Functions
+# Deploy to Base Sepolia
+npm run deploy:base-sepolia
+```
 
-#### AuctionHouse
-- `createAuction(nft, tokenId, reserve, endBlock, depositPct)` - Create new auction
-- `commitBid(auctionId, ciphertext, condition, refundTo)` - Submit encrypted bid
-- `finalize(auctionId)` - Complete auction and distribute prizes
-- `getAuction(auctionId)` - Get auction details
+## 📊 Gas Costs (Base Sepolia)
 
-#### WinnerSBT
-- `mintLocked(to, auctionId)` - Mint winner badge
-- `locked(tokenId)` - Check if token is transferable (always true)
-- `getAuctionId(tokenId)` - Get associated auction ID
+| Function | Gas Cost | USD Cost* |
+|----------|----------|-----------|
+| Create Auction | ~150,000 | ~$0.0001 |
+| Place Bid | ~100,000 | ~$0.0001 |
+| Finalize Auction | ~200,000 | ~$0.0001 |
+
+*Based on Base Sepolia gas prices
+
+## 🔮 Future Roadmap
+
+- **🌐 Mainnet Deployment** - Launch on Base mainnet
+- **🎨 NFT Creation** - Built-in NFT minting
+- **📱 Mobile App** - React Native application
+- **🤖 AI Integration** - Smart pricing recommendations
+- **🔗 Cross-chain** - Multi-network support
 
 ## 🤝 Contributing
 
@@ -224,29 +244,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Documentation** - Check this README and inline code comments
-- **Issues** - Report bugs via GitHub Issues
-- **Discussions** - Join community discussions
-- **Discord** - Join our Discord server for real-time help
-
-## 🔮 Roadmap
-
-- [ ] **Q1 2024** - Mainnet deployment
-- [ ] **Q2 2024** - Mobile app development
-- [ ] **Q3 2024** - Advanced analytics dashboard
-- [ ] **Q4 2024** - Cross-chain auction support
-- [ ] **2025** - DAO governance implementation
+- **Discord**: [Join our community](https://discord.gg/ngt-marketplace)
+- **Documentation**: [docs.ngt-marketplace.com](https://docs.ngt-marketplace.com)
+- **Issues**: [GitHub Issues](https://github.com/ngt-marketplace/issues)
 
 ## 🙏 Acknowledgments
 
-- **OpenZeppelin** - Secure smart contract libraries
-- **Hardhat** - Development framework
-- **Tailwind CSS** - Utility-first CSS framework
-- **Shadcn/ui** - Beautiful UI components
-- **Ethereum Foundation** - Blockchain platform
+- **Blocklock Team** - For time-based encryption technology
+- **Base Network** - For low-cost, fast blockchain infrastructure
+- **OpenZeppelin** - For secure smart contract standards
+- **Randamu** - For verifiable randomness
 
 ---
 
-**Built with ❤️ by the Tanmay's NFT Mart team**
+**🎉 Ready to revolutionize NFT auctions with true bid privacy? Start bidding today!**
 
-*Transform your digital art into valuable assets with the power of blockchain technology!*
+Built with ❤️ by the NGT Team | [Website](https://ngt-marketplace.com) | [Twitter](https://twitter.com/ngt_marketplace)

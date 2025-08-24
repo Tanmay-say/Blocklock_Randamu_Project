@@ -23,58 +23,116 @@ import type {
   TypedContractMethod,
 } from "../common";
 
+export declare namespace BLS {
+  export type PointG2Struct = {
+    x: [BigNumberish, BigNumberish];
+    y: [BigNumberish, BigNumberish];
+  };
+
+  export type PointG2StructOutput = [
+    x: [bigint, bigint],
+    y: [bigint, bigint]
+  ] & { x: [bigint, bigint]; y: [bigint, bigint] };
+}
+
+export declare namespace TypesLib {
+  export type CiphertextStruct = {
+    u: BLS.PointG2Struct;
+    v: BytesLike;
+    w: BytesLike;
+  };
+
+  export type CiphertextStructOutput = [
+    u: BLS.PointG2StructOutput,
+    v: string,
+    w: string
+  ] & { u: BLS.PointG2StructOutput; v: string; w: string };
+}
+
 export interface AuctionHouseInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "ADMIN_ROLE"
+      | "BASIS_POINTS"
       | "DEFAULT_ADMIN_ROLE"
       | "SELLER_ROLE"
+      | "TAX_PERCENTAGE"
+      | "acceptOwnership"
       | "addSeller"
+      | "adminWallet"
       | "auctions"
+      | "blocklock"
       | "commitBid"
       | "createAuction"
+      | "createSubscriptionAndFundNative"
+      | "decodeBid"
       | "emergencyWithdraw"
       | "emergencyWithdrawNFT"
       | "finalize"
       | "fulfillRandomness"
+      | "fundContractNative"
       | "getAuction"
+      | "getAuctionBids"
+      | "getBalance"
       | "getBidder"
       | "getBidderCount"
+      | "getDecodedBid"
       | "getDeposit"
       | "getRoleAdmin"
+      | "getTaxCollected"
       | "grantRole"
       | "hasBid"
       | "hasRole"
-      | "onBlocklockDecryption"
+      | "isBidDecoded"
+      | "isInFlight"
       | "onERC721Received"
       | "owner"
+      | "pendingRequestExists"
       | "randamuVRF"
+      | "receiveBlocklock"
       | "removeSeller"
-      | "renounceOwnership"
       | "renounceRole"
       | "requestTieBreakRandomness"
       | "revokeRole"
+      | "setBlocklock"
+      | "setSubId"
+      | "subscriptionId"
       | "supportsInterface"
+      | "topUpSubscriptionNative"
       | "transferOwnership"
+      | "updateAdminWallet"
+      | "updateSubscription"
       | "winnerSBT"
+      | "withdrawNative"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "AdminWalletUpdated"
       | "AuctionCreated"
       | "AuctionFinalized"
       | "BidCommitted"
       | "BidRevealed"
+      | "Funded"
+      | "NewSubscriptionId"
+      | "OwnershipTransferRequested"
       | "OwnershipTransferred"
+      | "Received"
       | "RoleAdminChanged"
       | "RoleGranted"
       | "RoleRevoked"
+      | "TaxCollected"
       | "TieBreakRandomnessFulfilled"
       | "TieBreakRandomnessRequested"
+      | "Withdrawn"
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "ADMIN_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "BASIS_POINTS",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -86,16 +144,29 @@ export interface AuctionHouseInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "TAX_PERCENTAGE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "acceptOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "addSeller",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "adminWallet",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "auctions",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "blocklock", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "commitBid",
-    values: [BigNumberish, BytesLike, BytesLike, AddressLike]
+    values: [BigNumberish, TypesLib.CiphertextStruct, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "createAuction",
@@ -106,6 +177,14 @@ export interface AuctionHouseInterface extends Interface {
       BigNumberish,
       BigNumberish
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createSubscriptionAndFundNative",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "decodeBid",
+    values: [BigNumberish, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "emergencyWithdraw",
@@ -124,8 +203,20 @@ export interface AuctionHouseInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "fundContractNative",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getAuction",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAuctionBids",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBalance",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getBidder",
@@ -136,12 +227,20 @@ export interface AuctionHouseInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "getDecodedBid",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getDeposit",
     values: [BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTaxCollected",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
@@ -156,8 +255,12 @@ export interface AuctionHouseInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "onBlocklockDecryption",
-    values: [BigNumberish, AddressLike, BigNumberish, BytesLike]
+    functionFragment: "isBidDecoded",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isInFlight",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "onERC721Received",
@@ -165,16 +268,20 @@ export interface AuctionHouseInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "pendingRequestExists",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "randamuVRF",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "removeSeller",
-    values: [AddressLike]
+    functionFragment: "receiveBlocklock",
+    values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
+    functionFragment: "removeSeller",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
@@ -189,16 +296,48 @@ export interface AuctionHouseInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "setBlocklock",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSubId",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionId",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "topUpSubscriptionNative",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "updateAdminWallet",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateSubscription",
+    values: [AddressLike[]]
+  ): string;
   encodeFunctionData(functionFragment: "winnerSBT", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "withdrawNative",
+    values: [BigNumberish, AddressLike]
+  ): string;
 
   decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "BASIS_POINTS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
@@ -207,13 +346,31 @@ export interface AuctionHouseInterface extends Interface {
     functionFragment: "SELLER_ROLE",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "TAX_PERCENTAGE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "acceptOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "addSeller", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "adminWallet",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "auctions", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "blocklock", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "commitBid", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createAuction",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "createSubscriptionAndFundNative",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "decodeBid", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "emergencyWithdraw",
     data: BytesLike
@@ -227,10 +384,23 @@ export interface AuctionHouseInterface extends Interface {
     functionFragment: "fulfillRandomness",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "fundContractNative",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "getAuction", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getAuctionBids",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBidder", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getBidderCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getDecodedBid",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getDeposit", data: BytesLike): Result;
@@ -238,25 +408,34 @@ export interface AuctionHouseInterface extends Interface {
     functionFragment: "getRoleAdmin",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTaxCollected",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasBid", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "onBlocklockDecryption",
+    functionFragment: "isBidDecoded",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "isInFlight", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "onERC721Received",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pendingRequestExists",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "randamuVRF", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "removeSeller",
+    functionFragment: "receiveBlocklock",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "renounceOwnership",
+    functionFragment: "removeSeller",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -269,14 +448,52 @@ export interface AuctionHouseInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "setBlocklock",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "setSubId", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "topUpSubscriptionNative",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateAdminWallet",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateSubscription",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "winnerSBT", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawNative",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace AdminWalletUpdatedEvent {
+  export type InputTuple = [oldAdmin: AddressLike, newAdmin: AddressLike];
+  export type OutputTuple = [oldAdmin: string, newAdmin: string];
+  export interface OutputObject {
+    oldAdmin: string;
+    newAdmin: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace AuctionCreatedEvent {
@@ -333,24 +550,21 @@ export namespace BidCommittedEvent {
     auctionId: BigNumberish,
     bidIndex: BigNumberish,
     bidder: AddressLike,
-    ciphertext: BytesLike,
-    condition: BytesLike,
+    blocklockRequestId: BigNumberish,
     deposit: BigNumberish
   ];
   export type OutputTuple = [
     auctionId: bigint,
     bidIndex: bigint,
     bidder: string,
-    ciphertext: string,
-    condition: string,
+    blocklockRequestId: bigint,
     deposit: bigint
   ];
   export interface OutputObject {
     auctionId: bigint;
     bidIndex: bigint;
     bidder: string;
-    ciphertext: string;
-    condition: string;
+    blocklockRequestId: bigint;
     deposit: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -377,12 +591,63 @@ export namespace BidRevealedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace OwnershipTransferredEvent {
-  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
-  export type OutputTuple = [previousOwner: string, newOwner: string];
+export namespace FundedEvent {
+  export type InputTuple = [sender: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [sender: string, amount: bigint];
   export interface OutputObject {
-    previousOwner: string;
-    newOwner: string;
+    sender: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace NewSubscriptionIdEvent {
+  export type InputTuple = [subscriptionId: BigNumberish];
+  export type OutputTuple = [subscriptionId: bigint];
+  export interface OutputObject {
+    subscriptionId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferRequestedEvent {
+  export type InputTuple = [from: AddressLike, to: AddressLike];
+  export type OutputTuple = [from: string, to: string];
+  export interface OutputObject {
+    from: string;
+    to: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [from: AddressLike, to: AddressLike];
+  export type OutputTuple = [from: string, to: string];
+  export interface OutputObject {
+    from: string;
+    to: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace ReceivedEvent {
+  export type InputTuple = [arg0: AddressLike, arg1: BigNumberish];
+  export type OutputTuple = [arg0: string, arg1: bigint];
+  export interface OutputObject {
+    arg0: string;
+    arg1: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -448,6 +713,28 @@ export namespace RoleRevokedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace TaxCollectedEvent {
+  export type InputTuple = [
+    auctionId: BigNumberish,
+    bidder: AddressLike,
+    taxAmount: BigNumberish
+  ];
+  export type OutputTuple = [
+    auctionId: bigint,
+    bidder: string,
+    taxAmount: bigint
+  ];
+  export interface OutputObject {
+    auctionId: bigint;
+    bidder: string;
+    taxAmount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace TieBreakRandomnessFulfilledEvent {
   export type InputTuple = [
     auctionId: BigNumberish,
@@ -476,6 +763,19 @@ export namespace TieBreakRandomnessRequestedEvent {
   export interface OutputObject {
     auctionId: bigint;
     requestId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace WithdrawnEvent {
+  export type InputTuple = [recipient: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [recipient: string, amount: bigint];
+  export interface OutputObject {
+    recipient: string;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -528,11 +828,19 @@ export interface AuctionHouse extends BaseContract {
 
   ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
+  BASIS_POINTS: TypedContractMethod<[], [bigint], "view">;
+
   DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
   SELLER_ROLE: TypedContractMethod<[], [string], "view">;
 
+  TAX_PERCENTAGE: TypedContractMethod<[], [bigint], "view">;
+
+  acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
   addSeller: TypedContractMethod<[seller: AddressLike], [void], "nonpayable">;
+
+  adminWallet: TypedContractMethod<[], [string], "view">;
 
   auctions: TypedContractMethod<
     [arg0: BigNumberish],
@@ -546,6 +854,7 @@ export interface AuctionHouse extends BaseContract {
         string,
         boolean,
         string,
+        bigint,
         bigint
       ] & {
         nft: string;
@@ -557,17 +866,20 @@ export interface AuctionHouse extends BaseContract {
         settled: boolean;
         winner: string;
         winningBid: bigint;
+        totalTaxCollected: bigint;
       }
     ],
     "view"
   >;
 
+  blocklock: TypedContractMethod<[], [string], "view">;
+
   commitBid: TypedContractMethod<
     [
       auctionId: BigNumberish,
-      ciphertext: BytesLike,
+      encryptedBid: TypesLib.CiphertextStruct,
       condition: BytesLike,
-      refundTo: AddressLike
+      callbackGasLimit: BigNumberish
     ],
     [void],
     "payable"
@@ -581,6 +893,14 @@ export interface AuctionHouse extends BaseContract {
       endBlock: BigNumberish,
       depositPct: BigNumberish
     ],
+    [void],
+    "nonpayable"
+  >;
+
+  createSubscriptionAndFundNative: TypedContractMethod<[], [void], "payable">;
+
+  decodeBid: TypedContractMethod<
+    [auctionId: BigNumberish, bidder: AddressLike, amount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -604,6 +924,8 @@ export interface AuctionHouse extends BaseContract {
     [void],
     "nonpayable"
   >;
+
+  fundContractNative: TypedContractMethod<[], [void], "payable">;
 
   getAuction: TypedContractMethod<
     [auctionId: BigNumberish],
@@ -633,6 +955,21 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
 
+  getAuctionBids: TypedContractMethod<
+    [auctionId: BigNumberish],
+    [
+      [string[], bigint[], bigint[], boolean[]] & {
+        bidders: string[];
+        deposits: bigint[];
+        decodedBids: bigint[];
+        decoded: boolean[];
+      }
+    ],
+    "view"
+  >;
+
+  getBalance: TypedContractMethod<[], [bigint], "view">;
+
   getBidder: TypedContractMethod<
     [auctionId: BigNumberish, index: BigNumberish],
     [string],
@@ -645,6 +982,12 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
 
+  getDecodedBid: TypedContractMethod<
+    [auctionId: BigNumberish, bidder: AddressLike],
+    [bigint],
+    "view"
+  >;
+
   getDeposit: TypedContractMethod<
     [auctionId: BigNumberish, bidder: AddressLike],
     [bigint],
@@ -652,6 +995,12 @@ export interface AuctionHouse extends BaseContract {
   >;
 
   getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
+
+  getTaxCollected: TypedContractMethod<
+    [auctionId: BigNumberish],
+    [bigint],
+    "view"
+  >;
 
   grantRole: TypedContractMethod<
     [role: BytesLike, account: AddressLike],
@@ -671,16 +1020,13 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
 
-  onBlocklockDecryption: TypedContractMethod<
-    [
-      auctionId: BigNumberish,
-      bidder: AddressLike,
-      amount: BigNumberish,
-      proof: BytesLike
-    ],
-    [void],
-    "nonpayable"
+  isBidDecoded: TypedContractMethod<
+    [auctionId: BigNumberish, bidder: AddressLike],
+    [boolean],
+    "view"
   >;
+
+  isInFlight: TypedContractMethod<[requestId: BigNumberish], [boolean], "view">;
 
   onERC721Received: TypedContractMethod<
     [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish, arg3: BytesLike],
@@ -690,15 +1036,25 @@ export interface AuctionHouse extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
+  pendingRequestExists: TypedContractMethod<
+    [subId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
   randamuVRF: TypedContractMethod<[], [string], "view">;
+
+  receiveBlocklock: TypedContractMethod<
+    [requestId: BigNumberish, decryptionKey: BytesLike],
+    [void],
+    "nonpayable"
+  >;
 
   removeSeller: TypedContractMethod<
     [seller: AddressLike],
     [void],
     "nonpayable"
   >;
-
-  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   renounceRole: TypedContractMethod<
     [role: BytesLike, callerConfirmation: AddressLike],
@@ -718,19 +1074,49 @@ export interface AuctionHouse extends BaseContract {
     "nonpayable"
   >;
 
+  setBlocklock: TypedContractMethod<
+    [_blocklock: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setSubId: TypedContractMethod<[subId: BigNumberish], [void], "nonpayable">;
+
+  subscriptionId: TypedContractMethod<[], [bigint], "view">;
+
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
     "view"
   >;
 
+  topUpSubscriptionNative: TypedContractMethod<[], [void], "payable">;
+
   transferOwnership: TypedContractMethod<
-    [newOwner: AddressLike],
+    [to: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  updateAdminWallet: TypedContractMethod<
+    [newAdminWallet: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  updateSubscription: TypedContractMethod<
+    [consumers: AddressLike[]],
     [void],
     "nonpayable"
   >;
 
   winnerSBT: TypedContractMethod<[], [string], "view">;
+
+  withdrawNative: TypedContractMethod<
+    [amount: BigNumberish, recipient: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -740,14 +1126,26 @@ export interface AuctionHouse extends BaseContract {
     nameOrSignature: "ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "BASIS_POINTS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "DEFAULT_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "SELLER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "TAX_PERCENTAGE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "acceptOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "addSeller"
   ): TypedContractMethod<[seller: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "adminWallet"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "auctions"
   ): TypedContractMethod<
@@ -762,6 +1160,7 @@ export interface AuctionHouse extends BaseContract {
         string,
         boolean,
         string,
+        bigint,
         bigint
       ] & {
         nft: string;
@@ -773,18 +1172,22 @@ export interface AuctionHouse extends BaseContract {
         settled: boolean;
         winner: string;
         winningBid: bigint;
+        totalTaxCollected: bigint;
       }
     ],
     "view"
   >;
   getFunction(
+    nameOrSignature: "blocklock"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "commitBid"
   ): TypedContractMethod<
     [
       auctionId: BigNumberish,
-      ciphertext: BytesLike,
+      encryptedBid: TypesLib.CiphertextStruct,
       condition: BytesLike,
-      refundTo: AddressLike
+      callbackGasLimit: BigNumberish
     ],
     [void],
     "payable"
@@ -799,6 +1202,16 @@ export interface AuctionHouse extends BaseContract {
       endBlock: BigNumberish,
       depositPct: BigNumberish
     ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "createSubscriptionAndFundNative"
+  ): TypedContractMethod<[], [void], "payable">;
+  getFunction(
+    nameOrSignature: "decodeBid"
+  ): TypedContractMethod<
+    [auctionId: BigNumberish, bidder: AddressLike, amount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -822,6 +1235,9 @@ export interface AuctionHouse extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "fundContractNative"
+  ): TypedContractMethod<[], [void], "payable">;
   getFunction(
     nameOrSignature: "getAuction"
   ): TypedContractMethod<
@@ -852,6 +1268,23 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getAuctionBids"
+  ): TypedContractMethod<
+    [auctionId: BigNumberish],
+    [
+      [string[], bigint[], bigint[], boolean[]] & {
+        bidders: string[];
+        deposits: bigint[];
+        decodedBids: bigint[];
+        decoded: boolean[];
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getBalance"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "getBidder"
   ): TypedContractMethod<
     [auctionId: BigNumberish, index: BigNumberish],
@@ -862,6 +1295,13 @@ export interface AuctionHouse extends BaseContract {
     nameOrSignature: "getBidderCount"
   ): TypedContractMethod<[auctionId: BigNumberish], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getDecodedBid"
+  ): TypedContractMethod<
+    [auctionId: BigNumberish, bidder: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getDeposit"
   ): TypedContractMethod<
     [auctionId: BigNumberish, bidder: AddressLike],
@@ -871,6 +1311,9 @@ export interface AuctionHouse extends BaseContract {
   getFunction(
     nameOrSignature: "getRoleAdmin"
   ): TypedContractMethod<[role: BytesLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "getTaxCollected"
+  ): TypedContractMethod<[auctionId: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "grantRole"
   ): TypedContractMethod<
@@ -893,17 +1336,15 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "onBlocklockDecryption"
+    nameOrSignature: "isBidDecoded"
   ): TypedContractMethod<
-    [
-      auctionId: BigNumberish,
-      bidder: AddressLike,
-      amount: BigNumberish,
-      proof: BytesLike
-    ],
-    [void],
-    "nonpayable"
+    [auctionId: BigNumberish, bidder: AddressLike],
+    [boolean],
+    "view"
   >;
+  getFunction(
+    nameOrSignature: "isInFlight"
+  ): TypedContractMethod<[requestId: BigNumberish], [boolean], "view">;
   getFunction(
     nameOrSignature: "onERC721Received"
   ): TypedContractMethod<
@@ -915,14 +1356,21 @@ export interface AuctionHouse extends BaseContract {
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "pendingRequestExists"
+  ): TypedContractMethod<[subId: BigNumberish], [boolean], "view">;
+  getFunction(
     nameOrSignature: "randamuVRF"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "receiveBlocklock"
+  ): TypedContractMethod<
+    [requestId: BigNumberish, decryptionKey: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "removeSeller"
   ): TypedContractMethod<[seller: AddressLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "renounceOwnership"
-  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
@@ -941,15 +1389,47 @@ export interface AuctionHouse extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "setBlocklock"
+  ): TypedContractMethod<[_blocklock: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setSubId"
+  ): TypedContractMethod<[subId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "subscriptionId"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
+    nameOrSignature: "topUpSubscriptionNative"
+  ): TypedContractMethod<[], [void], "payable">;
+  getFunction(
     nameOrSignature: "transferOwnership"
-  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<[to: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateAdminWallet"
+  ): TypedContractMethod<[newAdminWallet: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateSubscription"
+  ): TypedContractMethod<[consumers: AddressLike[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "winnerSBT"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "withdrawNative"
+  ): TypedContractMethod<
+    [amount: BigNumberish, recipient: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
+  getEvent(
+    key: "AdminWalletUpdated"
+  ): TypedContractEvent<
+    AdminWalletUpdatedEvent.InputTuple,
+    AdminWalletUpdatedEvent.OutputTuple,
+    AdminWalletUpdatedEvent.OutputObject
+  >;
   getEvent(
     key: "AuctionCreated"
   ): TypedContractEvent<
@@ -979,11 +1459,39 @@ export interface AuctionHouse extends BaseContract {
     BidRevealedEvent.OutputObject
   >;
   getEvent(
+    key: "Funded"
+  ): TypedContractEvent<
+    FundedEvent.InputTuple,
+    FundedEvent.OutputTuple,
+    FundedEvent.OutputObject
+  >;
+  getEvent(
+    key: "NewSubscriptionId"
+  ): TypedContractEvent<
+    NewSubscriptionIdEvent.InputTuple,
+    NewSubscriptionIdEvent.OutputTuple,
+    NewSubscriptionIdEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferRequested"
+  ): TypedContractEvent<
+    OwnershipTransferRequestedEvent.InputTuple,
+    OwnershipTransferRequestedEvent.OutputTuple,
+    OwnershipTransferRequestedEvent.OutputObject
+  >;
+  getEvent(
     key: "OwnershipTransferred"
   ): TypedContractEvent<
     OwnershipTransferredEvent.InputTuple,
     OwnershipTransferredEvent.OutputTuple,
     OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "Received"
+  ): TypedContractEvent<
+    ReceivedEvent.InputTuple,
+    ReceivedEvent.OutputTuple,
+    ReceivedEvent.OutputObject
   >;
   getEvent(
     key: "RoleAdminChanged"
@@ -1007,6 +1515,13 @@ export interface AuctionHouse extends BaseContract {
     RoleRevokedEvent.OutputObject
   >;
   getEvent(
+    key: "TaxCollected"
+  ): TypedContractEvent<
+    TaxCollectedEvent.InputTuple,
+    TaxCollectedEvent.OutputTuple,
+    TaxCollectedEvent.OutputObject
+  >;
+  getEvent(
     key: "TieBreakRandomnessFulfilled"
   ): TypedContractEvent<
     TieBreakRandomnessFulfilledEvent.InputTuple,
@@ -1020,8 +1535,26 @@ export interface AuctionHouse extends BaseContract {
     TieBreakRandomnessRequestedEvent.OutputTuple,
     TieBreakRandomnessRequestedEvent.OutputObject
   >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
+  >;
 
   filters: {
+    "AdminWalletUpdated(address,address)": TypedContractEvent<
+      AdminWalletUpdatedEvent.InputTuple,
+      AdminWalletUpdatedEvent.OutputTuple,
+      AdminWalletUpdatedEvent.OutputObject
+    >;
+    AdminWalletUpdated: TypedContractEvent<
+      AdminWalletUpdatedEvent.InputTuple,
+      AdminWalletUpdatedEvent.OutputTuple,
+      AdminWalletUpdatedEvent.OutputObject
+    >;
+
     "AuctionCreated(uint256,address,uint256,address,uint256,uint256)": TypedContractEvent<
       AuctionCreatedEvent.InputTuple,
       AuctionCreatedEvent.OutputTuple,
@@ -1044,7 +1577,7 @@ export interface AuctionHouse extends BaseContract {
       AuctionFinalizedEvent.OutputObject
     >;
 
-    "BidCommitted(uint256,uint256,address,bytes,bytes,uint256)": TypedContractEvent<
+    "BidCommitted(uint256,uint256,address,uint256,uint256)": TypedContractEvent<
       BidCommittedEvent.InputTuple,
       BidCommittedEvent.OutputTuple,
       BidCommittedEvent.OutputObject
@@ -1066,6 +1599,39 @@ export interface AuctionHouse extends BaseContract {
       BidRevealedEvent.OutputObject
     >;
 
+    "Funded(address,uint256)": TypedContractEvent<
+      FundedEvent.InputTuple,
+      FundedEvent.OutputTuple,
+      FundedEvent.OutputObject
+    >;
+    Funded: TypedContractEvent<
+      FundedEvent.InputTuple,
+      FundedEvent.OutputTuple,
+      FundedEvent.OutputObject
+    >;
+
+    "NewSubscriptionId(uint256)": TypedContractEvent<
+      NewSubscriptionIdEvent.InputTuple,
+      NewSubscriptionIdEvent.OutputTuple,
+      NewSubscriptionIdEvent.OutputObject
+    >;
+    NewSubscriptionId: TypedContractEvent<
+      NewSubscriptionIdEvent.InputTuple,
+      NewSubscriptionIdEvent.OutputTuple,
+      NewSubscriptionIdEvent.OutputObject
+    >;
+
+    "OwnershipTransferRequested(address,address)": TypedContractEvent<
+      OwnershipTransferRequestedEvent.InputTuple,
+      OwnershipTransferRequestedEvent.OutputTuple,
+      OwnershipTransferRequestedEvent.OutputObject
+    >;
+    OwnershipTransferRequested: TypedContractEvent<
+      OwnershipTransferRequestedEvent.InputTuple,
+      OwnershipTransferRequestedEvent.OutputTuple,
+      OwnershipTransferRequestedEvent.OutputObject
+    >;
+
     "OwnershipTransferred(address,address)": TypedContractEvent<
       OwnershipTransferredEvent.InputTuple,
       OwnershipTransferredEvent.OutputTuple,
@@ -1075,6 +1641,17 @@ export interface AuctionHouse extends BaseContract {
       OwnershipTransferredEvent.InputTuple,
       OwnershipTransferredEvent.OutputTuple,
       OwnershipTransferredEvent.OutputObject
+    >;
+
+    "Received(address,uint256)": TypedContractEvent<
+      ReceivedEvent.InputTuple,
+      ReceivedEvent.OutputTuple,
+      ReceivedEvent.OutputObject
+    >;
+    Received: TypedContractEvent<
+      ReceivedEvent.InputTuple,
+      ReceivedEvent.OutputTuple,
+      ReceivedEvent.OutputObject
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)": TypedContractEvent<
@@ -1110,6 +1687,17 @@ export interface AuctionHouse extends BaseContract {
       RoleRevokedEvent.OutputObject
     >;
 
+    "TaxCollected(uint256,address,uint256)": TypedContractEvent<
+      TaxCollectedEvent.InputTuple,
+      TaxCollectedEvent.OutputTuple,
+      TaxCollectedEvent.OutputObject
+    >;
+    TaxCollected: TypedContractEvent<
+      TaxCollectedEvent.InputTuple,
+      TaxCollectedEvent.OutputTuple,
+      TaxCollectedEvent.OutputObject
+    >;
+
     "TieBreakRandomnessFulfilled(uint256,uint256,uint256)": TypedContractEvent<
       TieBreakRandomnessFulfilledEvent.InputTuple,
       TieBreakRandomnessFulfilledEvent.OutputTuple,
@@ -1130,6 +1718,17 @@ export interface AuctionHouse extends BaseContract {
       TieBreakRandomnessRequestedEvent.InputTuple,
       TieBreakRandomnessRequestedEvent.OutputTuple,
       TieBreakRandomnessRequestedEvent.OutputObject
+    >;
+
+    "Withdrawn(address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }

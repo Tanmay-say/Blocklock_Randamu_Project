@@ -5,12 +5,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IBlocklockReceiver.sol";
+
+import {TypesLib} from "blocklock-solidity/src/libraries/TypesLib.sol";
+import {AbstractBlocklockReceiver} from "blocklock-solidity/src/AbstractBlocklockReceiver.sol";
 import "./interfaces/IRandamuVRF.sol";
 import "./WinnerSBT.sol";
 
-contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlocklockReceiver, Ownable {
+contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, AbstractBlocklockReceiver {
     uint256 private _auctionIds = 0;
     
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -18,6 +19,13 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
     
     WinnerSBT public immutable winnerSBT;
     IRandamuVRF public immutable randamuVRF;
+    
+    // Admin wallet that receives winning amounts
+    address public adminWallet;
+    
+    // Tax percentage for losing bidders (in basis points, 2000 = 20%)
+    uint256 public constant TAX_PERCENTAGE = 2000; // 20%
+    uint256 public constant BASIS_POINTS = 10000;
     
     struct Auction {
         address nft;
@@ -30,14 +38,18 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         address winner;
         uint256 winningBid;
         mapping(address => uint256) deposits;
-        mapping(address => bytes) encryptedBids;
+        mapping(address => TypesLib.Ciphertext) encryptedBids;
         mapping(address => bytes) conditions;
+        mapping(address => uint256) blocklockRequestIds;
+        mapping(address => uint256) decodedBids; // Store decoded bid amounts
+        mapping(address => bool) bidDecoded; // Track which bids have been decoded
         address[] bidders;
+        uint256 totalTaxCollected; // Track tax collected from this auction
     }
     
     struct EncryptedBid {
         address bidder;
-        bytes ciphertext;
+        TypesLib.Ciphertext ciphertext;
         bytes condition;
         uint256 deposit;
     }
@@ -58,8 +70,7 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         uint256 indexed auctionId,
         uint256 indexed bidIndex,
         address indexed bidder,
-        bytes ciphertext,
-        bytes condition,
+        uint256 blocklockRequestId,
         uint256 deposit
     );
     
@@ -84,6 +95,17 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         uint256 indexed auctionId,
         uint256 indexed requestId,
         uint256 randomness
+    );
+    
+    event TaxCollected(
+        uint256 indexed auctionId,
+        address indexed bidder,
+        uint256 taxAmount
+    );
+    
+    event AdminWalletUpdated(
+        address indexed oldAdmin,
+        address indexed newAdmin
     );
     
     modifier onlyAdmin() {
@@ -111,9 +133,13 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         _;
     }
     
-    constructor(address _winnerSBT, address _randamuVRF) Ownable(msg.sender) {
+    constructor(address _winnerSBT, address _randamuVRF, address _adminWallet, address _blocklockSender) 
+        AbstractBlocklockReceiver(_blocklockSender) {
+        require(_adminWallet != address(0), "Invalid admin wallet");
+        
         winnerSBT = WinnerSBT(_winnerSBT);
         randamuVRF = IRandamuVRF(_randamuVRF);
+        adminWallet = _adminWallet;
         
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
@@ -150,39 +176,81 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
     
     function commitBid(
         uint256 auctionId,
-        bytes calldata ciphertext,
+        TypesLib.Ciphertext calldata encryptedBid,
         bytes calldata condition,
-        address refundTo
+        uint32 callbackGasLimit
     ) external payable auctionExists(auctionId) auctionActive(auctionId) nonReentrant {
         require(!hasBid[auctionId][msg.sender], "Already bid");
-        require(ciphertext.length > 0, "Invalid ciphertext");
         require(condition.length > 0, "Invalid condition");
         
-        uint256 minDeposit = (auctions[auctionId].reserve * auctions[auctionId].depositPct) / 10000;
+        uint256 minDeposit = (auctions[auctionId].reserve * auctions[auctionId].depositPct) / 100;
         require(msg.value >= minDeposit, "Insufficient deposit");
+        
+        // Request blocklock decryption for the auction end block
+        (uint256 requestId,) = _requestBlocklockPayInNative(
+            callbackGasLimit,
+            condition,
+            encryptedBid
+        );
         
         hasBid[auctionId][msg.sender] = true;
         auctions[auctionId].deposits[msg.sender] = msg.value;
-        auctions[auctionId].encryptedBids[msg.sender] = ciphertext;
+        auctions[auctionId].encryptedBids[msg.sender] = encryptedBid;
         auctions[auctionId].conditions[msg.sender] = condition;
+        auctions[auctionId].blocklockRequestIds[msg.sender] = requestId;
         auctions[auctionId].bidders.push(msg.sender);
         
-        emit BidCommitted(auctionId, auctions[auctionId].bidders.length - 1, msg.sender, ciphertext, condition, msg.value);
+        emit BidCommitted(auctionId, auctions[auctionId].bidders.length - 1, msg.sender, requestId, msg.value);
     }
     
-    function onBlocklockDecryption(
+    function _onBlocklockReceived(uint256 requestId, bytes calldata decryptionKey) internal override {
+        // Find which auction and bidder this request belongs to
+        (uint256 auctionId, address bidder) = _findBidderByRequestId(requestId);
+        
+        require(hasBid[auctionId][bidder], "Bid not found");
+        require(!auctions[auctionId].bidDecoded[bidder], "Bid already decoded");
+        
+        // Decrypt the bid using the provided key
+        bytes memory decryptedData = _decrypt(auctions[auctionId].encryptedBids[bidder], decryptionKey);
+        uint256 bidAmount = abi.decode(decryptedData, (uint256));
+        
+        require(bidAmount > 0, "Invalid bid amount");
+        
+        // Store the decoded bid amount
+        auctions[auctionId].decodedBids[bidder] = bidAmount;
+        auctions[auctionId].bidDecoded[bidder] = true;
+        
+        emit BidRevealed(auctionId, bidder, bidAmount);
+    }
+    
+    function _findBidderByRequestId(uint256 requestId) internal view returns (uint256 auctionId, address bidder) {
+        // Search through auctions to find the matching request ID
+        for (uint256 i = 0; i < _auctionIds; i++) {
+            Auction storage auction = auctions[i];
+            for (uint256 j = 0; j < auction.bidders.length; j++) {
+                address currentBidder = auction.bidders[j];
+                if (auction.blocklockRequestIds[currentBidder] == requestId) {
+                    return (i, currentBidder);
+                }
+            }
+        }
+        revert("Request ID not found");
+    }
+    
+    // Manual function to decode bids (for testing or emergency use)
+    function decodeBid(
         uint256 auctionId,
         address bidder,
-        uint256 amount,
-        bytes calldata proof
-    ) external {
-        // This function will be called by Blocklock service when bid is decrypted
-        // Implementation depends on Blocklock integration
+        uint256 amount
+    ) external onlyAdmin auctionExists(auctionId) auctionEnded(auctionId) {
         require(hasBid[auctionId][bidder], "Bid not found");
+        require(!auctions[auctionId].bidDecoded[bidder], "Bid already decoded");
+        require(amount > 0, "Invalid bid amount");
         
-        // Process decrypted bid
-        // This is a placeholder - actual implementation will decode the bid
-        // and store it for finalization
+        auctions[auctionId].decodedBids[bidder] = amount;
+        auctions[auctionId].bidDecoded[bidder] = true;
+        
+        emit BidRevealed(auctionId, bidder, amount);
     }
     
     function requestTieBreakRandomness(uint256 auctionId) external onlyAdmin auctionExists(auctionId) auctionEnded(auctionId) {
@@ -201,24 +269,22 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         Auction storage auction = auctions[auctionId];
         require(!auction.settled, "Already settled");
         
-        // Find highest bidder
+        // Find highest bidder among decoded bids
         address winner = address(0);
         uint256 highestBid = 0;
         
         for (uint256 i = 0; i < auction.bidders.length; i++) {
             address bidder = auction.bidders[i];
-            // Here you would decode the actual bid amount from the decrypted data
-            // For now, we'll use a placeholder
-            uint256 bidAmount = auction.deposits[bidder]; // This is just the deposit
-            
-            if (bidAmount > highestBid) {
-                highestBid = bidAmount;
-                winner = bidder;
+            if (auction.bidDecoded[bidder]) {
+                uint256 bidAmount = auction.decodedBids[bidder];
+                if (bidAmount > highestBid && bidAmount >= auction.reserve) {
+                    highestBid = bidAmount;
+                    winner = bidder;
+                }
             }
         }
         
-        require(winner != address(0), "No valid bids");
-        require(highestBid >= auction.reserve, "Reserve not met");
+        require(winner != address(0), "No valid bids or reserve not met");
         
         auction.winner = winner;
         auction.winningBid = highestBid;
@@ -227,21 +293,40 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         // Transfer NFT to winner
         IERC721(auction.nft).safeTransferFrom(address(this), winner, auction.tokenId);
         
-        // Transfer winning bid to seller
-        (bool success, ) = auction.seller.call{value: highestBid}("");
-        require(success, "Transfer to seller failed");
+        // Transfer winning bid amount to admin wallet (not seller)
+        (bool adminSuccess, ) = adminWallet.call{value: highestBid}("");
+        require(adminSuccess, "Transfer to admin failed");
         
         // Mint winner SBT
         winnerSBT.mintLocked(winner, auctionId);
         
-        // Refund deposits to non-winners
+        // Process refunds for non-winners with tax deduction
+        uint256 totalTax = 0;
         for (uint256 i = 0; i < auction.bidders.length; i++) {
             address bidder = auction.bidders[i];
             if (bidder != winner && auction.deposits[bidder] > 0) {
-                (bool refundSuccess, ) = bidder.call{value: auction.deposits[bidder]}("");
-                require(refundSuccess, "Refund failed");
+                uint256 deposit = auction.deposits[bidder];
+                
+                // Calculate 20% tax on the deposit
+                uint256 tax = (deposit * TAX_PERCENTAGE) / BASIS_POINTS;
+                uint256 refundAmount = deposit - tax;
+                
+                totalTax += tax;
                 auction.deposits[bidder] = 0;
+                
+                // Refund the amount after tax deduction
+                if (refundAmount > 0) {
+                    (bool refundSuccess, ) = bidder.call{value: refundAmount}("");
+                    require(refundSuccess, "Refund failed");
+                }
             }
+        }
+        
+        // Transfer collected tax to admin wallet
+        if (totalTax > 0) {
+            auction.totalTaxCollected = totalTax;
+            (bool taxSuccess, ) = adminWallet.call{value: totalTax}("");
+            require(taxSuccess, "Tax transfer failed");
         }
         
         emit AuctionFinalized(auctionId, winner, highestBid);
@@ -284,6 +369,41 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
         return auctions[auctionId].deposits[bidder];
     }
     
+    function getDecodedBid(uint256 auctionId, address bidder) external view returns (uint256) {
+        return auctions[auctionId].decodedBids[bidder];
+    }
+    
+    function isBidDecoded(uint256 auctionId, address bidder) external view returns (bool) {
+        return auctions[auctionId].bidDecoded[bidder];
+    }
+    
+    function getTaxCollected(uint256 auctionId) external view returns (uint256) {
+        return auctions[auctionId].totalTaxCollected;
+    }
+    
+    function getAuctionBids(uint256 auctionId) external view returns (
+        address[] memory bidders,
+        uint256[] memory deposits,
+        uint256[] memory decodedBids,
+        bool[] memory decoded
+    ) {
+        Auction storage auction = auctions[auctionId];
+        uint256 length = auction.bidders.length;
+        
+        bidders = new address[](length);
+        deposits = new uint256[](length);
+        decodedBids = new uint256[](length);
+        decoded = new bool[](length);
+        
+        for (uint256 i = 0; i < length; i++) {
+            address bidder = auction.bidders[i];
+            bidders[i] = bidder;
+            deposits[i] = auction.deposits[bidder];
+            decodedBids[i] = auction.decodedBids[bidder];
+            decoded[i] = auction.bidDecoded[bidder];
+        }
+    }
+    
     // Admin functions
     function addSeller(address seller) external onlyAdmin {
         _grantRole(SELLER_ROLE, seller);
@@ -291,6 +411,13 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, IBlockloc
     
     function removeSeller(address seller) external onlyAdmin {
         _revokeRole(SELLER_ROLE, seller);
+    }
+    
+    function updateAdminWallet(address newAdminWallet) external onlyAdmin {
+        require(newAdminWallet != address(0), "Invalid admin wallet");
+        address oldAdmin = adminWallet;
+        adminWallet = newAdminWallet;
+        emit AdminWalletUpdated(oldAdmin, newAdminWallet);
     }
     
     function emergencyWithdraw() external onlyAdmin {
