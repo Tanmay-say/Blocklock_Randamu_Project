@@ -153,6 +153,20 @@ export const nfts: NFT[] = [
     ],
     status: 'available',
     currentBids: 0
+  },
+  {
+    id: "7",
+    name: "Tanmay Sayare",
+    description: "asd",
+    image: nft1,
+    price: 0.005,
+    tags: ["asd"],
+    creator: "0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC",
+    collection: "asd",
+    mintDate: "2025-01-08",
+    attributes: [],
+    status: 'available',
+    currentBids: 0
   }
 ];
 

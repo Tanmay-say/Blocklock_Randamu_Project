@@ -344,8 +344,8 @@ export const UserProfile: React.FC = () => {
                           
                           {/* Minting Status */}
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="text-xs text-orange-400">
-                              🎨 NFT Minting: Pending Admin Processing
+                            <div className="text-xs text-green-400">
+                              🎨 Real NFT: Check MetaMask NFTs Tab
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-1 mt-2">

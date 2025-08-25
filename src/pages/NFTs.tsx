@@ -13,6 +13,19 @@ import { Search, Filter, Grid3X3, List } from 'lucide-react';
 export const NFTs: React.FC = () => {
   const { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } = useNFT();
   const { account } = useWallet();
+  
+  // Debug logging for NFT visibility
+  React.useEffect(() => {
+    console.log('🏪 MARKETPLACE: Total NFTs in context:', nfts.length);
+    console.log('🔍 MARKETPLACE: All NFTs:', nfts.map(nft => ({
+      id: nft.id,
+      name: nft.name,
+      status: nft.status,
+      collection: nft.collection,
+      owner: nft.owner
+    })));
+    console.log('👤 MARKETPLACE: Current user account:', account);
+  }, [nfts, account]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [collectionFilter, setCollectionFilter] = useState<string>('all');
@@ -21,7 +34,7 @@ export const NFTs: React.FC = () => {
 
   // Filter NFTs for marketplace display (hide sold NFTs unless owned by user)
   const marketplaceNFTs = useMemo(() => {
-    return nfts.filter(nft => {
+    const filtered = nfts.filter(nft => {
       // Show all available and auction NFTs
       if (nft.status === 'available' || nft.status === 'auction') {
         return true;
@@ -35,6 +48,13 @@ export const NFTs: React.FC = () => {
       // Hide all other sold NFTs
       return false;
     });
+    
+    console.log('🎯 MARKETPLACE: Filtered NFTs for display:', filtered.length);
+    console.log('📊 MARKETPLACE: Available NFTs:', filtered.filter(nft => nft.status === 'available').length);
+    console.log('🔨 MARKETPLACE: Auction NFTs:', filtered.filter(nft => nft.status === 'auction').length);
+    console.log('💰 MARKETPLACE: User owned NFTs:', filtered.filter(nft => nft.status === 'sold').length);
+    
+    return filtered;
   }, [nfts, account]);
 
   // Get unique collections and tags for filters (from marketplace NFTs)
@@ -306,7 +326,7 @@ export const NFTs: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium text-white mb-2">No NFTs found</h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your search terms or filters to find what you're looking for.
+                Try adjusting your search terms or filters, or refresh the marketplace.
               </p>
               <Button onClick={clearFilters} variant="outline" className="border-nft-border text-muted-foreground hover:bg-background/50">
                 Clear all filters

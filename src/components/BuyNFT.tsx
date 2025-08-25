@@ -105,33 +105,95 @@ export const BuyNFT: React.FC = () => {
         let nftMinted = false;
         let tokenId = null;
         
-        // For now, we'll create a mint request that can be processed by admin
-        console.log('Creating NFT mint request for admin processing...');
+        // DIRECT NFT MINTING - Users get NFTs immediately!
+        console.log('Minting NFT directly to buyer...');
         
-        const mintRequest = {
-          buyer: account,
-          nft: {
+        try {
+          // Get TestNFT contract for direct minting
+          const testNFTContract = new ethers.Contract(
+            LOCAL_CONTRACT_ADDRESSES.testNFT,
+            [
+              "function mint(address to, string memory uri) external returns (uint256)",
+              "function ownerOf(uint256 tokenId) external view returns (address)",
+              "function tokenURI(uint256 tokenId) external view returns (string memory)",
+              "function totalSupply() external view returns (uint256)"
+            ],
+            signer
+          );
+          
+          // Create metadata URI for the NFT
+          const metadata = {
             name: nft.name,
             description: nft.description,
             image: nft.image,
-            attributes: nft.attributes || []
-          },
-          purchaseTransaction: tx.hash,
-          purchasePrice: nft.price,
-          purchaseDate: new Date().toISOString(),
-          marketplaceId: nft.id
-        };
-        
-        // Store mint request in localStorage for admin to process
-        const existingRequests = JSON.parse(localStorage.getItem('nft-mint-requests') || '[]');
-        existingRequests.push(mintRequest);
-        localStorage.setItem('nft-mint-requests', JSON.stringify(existingRequests));
-        
-        console.log('Mint request created:', mintRequest);
-        
-        // For demo purposes, simulate successful minting
-        // In production, admin would process these requests
-        nftMinted = false; // Will be true once admin processes the request
+            attributes: nft.attributes || [],
+            purchased_from: "NGT Marketplace",
+            original_price: nft.price,
+            purchase_date: new Date().toISOString(),
+            purchase_transaction: tx.hash,
+            buyer: account,
+            mint_date: new Date().toISOString()
+          };
+          
+          const metadataURI = `data:application/json;base64,${btoa(JSON.stringify(metadata))}`;
+          
+          console.log('Minting NFT with metadata:', metadata);
+          
+          // Mint NFT directly to the buyer
+          const mintTx = await testNFTContract.mint(account, metadataURI);
+          console.log('NFT mint transaction submitted:', mintTx.hash);
+          
+          toast({
+            title: "Minting Your NFT...",
+            description: `NFT is being minted to your wallet. Transaction: ${mintTx.hash.slice(0, 10)}...`,
+          });
+          
+          const mintReceipt = await mintTx.wait();
+          
+          if (mintReceipt?.status === 1) {
+            console.log('NFT minted successfully!', mintReceipt);
+            nftMinted = true;
+            
+            // Try to extract token ID from logs
+            if (mintReceipt.logs && mintReceipt.logs.length > 0) {
+              try {
+                // Transfer event signature for ERC721
+                const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+                const transferLog = mintReceipt.logs.find(log => log.topics[0] === transferEventSignature);
+                if (transferLog && transferLog.topics[3]) {
+                  tokenId = parseInt(transferLog.topics[3], 16);
+                  console.log('Extracted token ID:', tokenId);
+                }
+              } catch (e) {
+                console.warn('Could not extract token ID from logs:', e);
+                tokenId = 0; // Fallback
+              }
+            }
+            
+            console.log('🎉 NFT successfully minted to user! Token ID:', tokenId);
+            
+          } else {
+            throw new Error(`NFT minting transaction failed. Status: ${mintReceipt?.status}`);
+          }
+          
+        } catch (mintError: any) {
+          console.error('Direct NFT minting failed:', mintError);
+          
+          if (mintError.message && mintError.message.includes('Ownable: caller is not the owner')) {
+            console.log('❌ Contract still has onlyOwner restriction!');
+            console.log('ℹ️  Deploy the updated contract using: npx hardhat run scripts/deployDirectMinting.js --network base-sepolia');
+            
+            toast({
+              title: "NFT Minting Failed",
+              description: "Contract needs to be updated to allow direct minting. Contact admin.",
+              variant: "destructive",
+            });
+            
+            nftMinted = false;
+          } else {
+            throw mintError; // Re-throw other errors
+          }
+        }
         
         // Update NFT status in our local system
         console.log('Updating local NFT status...');
@@ -161,10 +223,11 @@ export const BuyNFT: React.FC = () => {
         };
 
         toast({
-          title: "Purchase Successful!",
+          title: nftMinted ? "🎉 NFT Purchased & Minted!" : "⚠️ Payment Successful",
           description: nftMinted 
-            ? `You have successfully purchased ${nft.name} for ${nft.price} ETH. Real NFT minted to your wallet! Check MetaMask NFTs tab.`
-            : `You have successfully purchased ${nft.name} for ${nft.price} ETH. Digital ownership recorded! Check your Profile to see your NFTs.`,
+            ? `Real NFT minted to your wallet! Token ID: ${tokenId || 'N/A'}. Check MetaMask NFTs tab.`
+            : `Payment confirmed but NFT minting failed. Deploy updated contract for direct minting.`,
+          variant: nftMinted ? "default" : "destructive",
         });
 
         console.log('Purchase completed successfully:', tx.hash);

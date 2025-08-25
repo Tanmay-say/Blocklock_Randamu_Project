@@ -32,7 +32,6 @@ export const NFTProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const savedNFTs = localStorage.getItem('nft-marketplace-data');
       if (savedNFTs) {
         const parsed = JSON.parse(savedNFTs);
-        // Validate the data structure
         if (Array.isArray(parsed) && parsed.length > 0) {
           console.log('NFTContext: Restored', parsed.length, 'NFTs from localStorage');
           return parsed;

@@ -48,7 +48,7 @@ export interface ContractAddresses {
 // Default addresses for Base Sepolia deployment
 export const LOCAL_CONTRACT_ADDRESSES: ContractAddresses = {
   auctionHouse: "0x6F8449Bb1E91970Ee39ECB3c71d7936e8e6d76Ba", // Deployed Base Sepolia
-  testNFT: "0x72ADEB4DE31E0C1D5Bd6b24c24C9ca11d6eD5705", // Deployed Base Sepolia
+  testNFT: "0x25326A7A5CB0dd897a77a54214c29B91Bac81BF4", // UPDATED: Direct minting enabled!
   winnerSBT: "0x12C2c5C8d2175Bc1dD80cD8A1b590C996B3f47d0", // Deployed Base Sepolia
   mockRandamuVRF: "0x15F508eAE92bee6e8d27b61C4A129ECF094e9aa3" // Deployed Base Sepolia
 };
