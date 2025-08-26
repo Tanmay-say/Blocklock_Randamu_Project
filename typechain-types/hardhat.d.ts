@@ -118,6 +118,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AuctionHouse__factory>;
     getContractFactory(
+      name: "GenAIImageStorage",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GenAIImageStorage__factory>;
+    getContractFactory(
+      name: "GenAINFT",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GenAINFT__factory>;
+    getContractFactory(
+      name: "GenAISubscription",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GenAISubscription__factory>;
+    getContractFactory(
       name: "IBlocklockReceiver",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBlocklockReceiver__factory>;
@@ -273,6 +285,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.AuctionHouse>;
     getContractAt(
+      name: "GenAIImageStorage",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GenAIImageStorage>;
+    getContractAt(
+      name: "GenAINFT",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GenAINFT>;
+    getContractAt(
+      name: "GenAISubscription",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GenAISubscription>;
+    getContractAt(
       name: "IBlocklockReceiver",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -408,6 +435,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AuctionHouse>;
     deployContract(
+      name: "GenAIImageStorage",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAIImageStorage>;
+    deployContract(
+      name: "GenAINFT",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAINFT>;
+    deployContract(
+      name: "GenAISubscription",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAISubscription>;
+    deployContract(
       name: "IBlocklockReceiver",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IBlocklockReceiver>;
@@ -562,6 +601,21 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AuctionHouse>;
+    deployContract(
+      name: "GenAIImageStorage",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAIImageStorage>;
+    deployContract(
+      name: "GenAINFT",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAINFT>;
+    deployContract(
+      name: "GenAISubscription",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.GenAISubscription>;
     deployContract(
       name: "IBlocklockReceiver",
       args: any[],

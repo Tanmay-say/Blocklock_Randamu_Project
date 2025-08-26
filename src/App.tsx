@@ -9,11 +9,12 @@ import { NFTProvider } from "@/contexts/NFTContext";
 import { BlockchainProvider } from "@/contexts/BlockchainContext";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
+import Pricing from "./pages/Pricing";
 import About from "./pages/About";
 import Collections from "./pages/Collections";
 import Contact from "./pages/Contact";
 import { Admin } from "./pages/Admin";
-import { GenAI } from "./pages/GenAI";
+import { GenAIEnhanced } from "./pages/GenAIEnhanced";
 import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { NFTs } from "./pages/NFTs";
@@ -35,11 +36,13 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/collections" element={<Collections />} />
                 <Route path="/contact" element={<Contact />} />
                             <Route path="/admin" element={<Admin />} />
-            <Route path="/genai" element={<GenAI />} />
+            <Route path="/genai" element={<GenAIEnhanced />} />
+            <Route path="/genai-enhanced" element={<GenAIEnhanced />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/nfts" element={<NFTs />} />
             <Route path="/place-bid/:id" element={<PlaceBid />} />

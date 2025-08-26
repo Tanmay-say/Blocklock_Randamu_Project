@@ -4,6 +4,9 @@
 import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { AuctionHouse } from "./AuctionHouse";
+export type { GenAIImageStorage } from "./GenAIImageStorage";
+export type { GenAINFT } from "./GenAINFT";
+export type { GenAISubscription } from "./GenAISubscription";
 export type { MockRandamuVRF } from "./MockRandamuVRF";
 export type { SimpleMarketplace } from "./SimpleMarketplace";
 export type { TestNFT } from "./TestNFT";

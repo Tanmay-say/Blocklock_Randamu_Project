@@ -49,25 +49,29 @@ export const Header = () => {
             Features
           </Link>
           <Link 
+            to="/genai" 
+            className={`transition-colors text-lg flex items-center gap-2 ${isActive('/genai') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            <Bot className="w-4 h-4" />
+            GenAI
+          </Link>
+          <Link 
             to="/about" 
             className={`transition-colors text-lg ${isActive('/about') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
           >
             About
           </Link>
           <Link 
+            to="/pricing" 
+            className={`transition-colors text-lg ${isActive('/pricing') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            Pricing
+          </Link>
+          <Link 
             to="/contact" 
             className={`transition-colors text-lg ${isActive('/contact') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
           >
             Contact
-          </Link>
-          
-          {/* GenAI Option for all users */}
-          <Link 
-            to="/genai" 
-            className={`transition-colors flex items-center gap-2 text-lg ${isActive('/genai') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-          >
-            <Bot className="w-5 h-5" />
-            GenAI
           </Link>
           
           {/* Profile - only visible to connected users */}

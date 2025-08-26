@@ -5,24 +5,9 @@ import heroCharacter from "@/assets/hero-character.png";
 
 const teamMembers = [
   {
-    name: "Alex Chen",
+    name: "Tanmay Sayare",
     role: "Founder & CEO",
     bio: "Blockchain enthusiast with 10+ years in digital art and technology."
-  },
-  {
-    name: "Sarah Rodriguez",
-    role: "Head of Product",
-    bio: "Former lead designer at major tech companies, passionate about NFT innovation."
-  },
-  {
-    name: "Marcus Johnson",
-    role: "CTO",
-    bio: "Ethereum developer and smart contract expert building the future of NFTs."
-  },
-  {
-    name: "Lisa Wang",
-    role: "Community Manager",
-    bio: "Digital artist and community builder connecting creators worldwide."
   }
 ];
 
