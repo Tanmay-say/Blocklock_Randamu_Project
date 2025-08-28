@@ -293,9 +293,11 @@ Generate a detailed, vivid description that could be used to create this image. 
     const placeholderUrl = `https://image.pollinations.ai/prompt/${prompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&safe=high&model=flux`;
     console.log('🖼️ Generated URL:', placeholderUrl);
 
+    // Use the actual HTTPS URL as the image reference so wallets (MetaMask, OpenSea)
+    // can render previews correctly from tokenURI metadata.
     const result = {
       url: placeholderUrl,
-      hash: "Qm" + imageHash // Mock IPFS hash
+      hash: placeholderUrl
     };
     console.log('🖼️ Returning result:', result);
     return result;
@@ -379,12 +381,24 @@ Generate a detailed, vivid description that could be used to create this image. 
    * Generate VRF seed for uniqueness
    */
   public generateVRFSeed(prompt: string, style: string, timestamp: number): number {
-    const combined = `${prompt}_${style}_${timestamp}_${Math.random()}`;
-    const hash = btoa(combined).replace(/[^a-zA-Z0-9]/g, '');
-    
-    // Convert hash to number and ensure it's within reasonable range
-    const seed = parseInt(hash.substring(0, 10), 16);
-    return seed % 1000000; // Keep it under 1 million for contract compatibility
+    try {
+      if (typeof crypto !== 'undefined' && (crypto as any).getRandomValues) {
+        const array = new Uint32Array(2);
+        (crypto as any).getRandomValues(array);
+        const hi = BigInt(array[0]);
+        const lo = BigInt(array[1]);
+        const seedBig = (hi << 32n) | lo;
+        return Number(seedBig % 0xffffffffn);
+      }
+    } catch {}
+
+    // Fallback: mix prompt/style/time with Math.random and hash-like folding
+    const entropy = `${prompt}|${style}|${timestamp}|${Math.random()}|${Math.random()}`;
+    let acc = 0;
+    for (let i = 0; i < entropy.length; i++) {
+      acc = (acc * 31 + entropy.charCodeAt(i)) >>> 0;
+    }
+    return acc >>> 0;
   }
 
   /**

@@ -63,6 +63,7 @@ export const GenAIEnhanced = () => {
   const [newImageIndex, setNewImageIndex] = useState<number | null>(null);
   const [customMintPrice, setCustomMintPrice] = useState<string>("");
   const [antiScreenshotOn, setAntiScreenshotOn] = useState(false);
+  const generationFee = (import.meta.env.VITE_GENAI_GENERATION_FEE_ETH as string) || "0.0001";
  
   // Security refs
   const previewRef = useRef<HTMLDivElement>(null);
@@ -250,6 +251,17 @@ export const GenAIEnhanced = () => {
     setIsGenerating(true);
 
     try {
+      // Free tier: charge per-generation fee (if any) before generating
+      if (isConnected && userProfile && userProfile.subscription.subType === 0 && Number(generationFee) > 0) {
+        try {
+          const tx = await genaiContractService.sendGenerationFee(generationFee);
+          toast({ title: "Generation Fee", description: `Processing fee ${generationFee} ETH...` });
+          await tx.wait();
+        } catch (feeErr) {
+          throw new Error('Payment cancelled or failed');
+        }
+      }
+
       // Validate prompt
       console.log('🔍 Validating prompt...');
       const validation = geminiService.validatePrompt(prompt);
@@ -276,7 +288,19 @@ export const GenAIEnhanced = () => {
       }
 
       // Generate VRF seed for uniqueness
-      const vrfSeed = geminiService.generateVRFSeed(prompt, selectedStyle, Date.now());
+      let vrfSeed = geminiService.generateVRFSeed(prompt, selectedStyle, Date.now());
+      if (genaiContractService.isInitialized()) {
+        try {
+          // Retry up to 5 times to avoid seed collisions
+          for (let i = 0; i < 5; i++) {
+            const used = await genaiContractService.nftVRFSeedUsed(vrfSeed);
+            if (!used) break;
+            vrfSeed = geminiService.generateVRFSeed(prompt, selectedStyle, Date.now() + Math.floor(Math.random() * 1e9));
+          }
+        } catch (e) {
+          console.warn('VRF seed check failed, proceeding with current seed');
+        }
+      }
 
       // Create image object
       const newImage: GeneratedImage = {
@@ -434,12 +458,32 @@ export const GenAIEnhanced = () => {
       toast({ title: "Connect Wallet", description: "Please connect your wallet to mint.", variant: "destructive" });
       return;
     }
-
+ 
     setIsMinting(true);
-
+ 
     try {
+      // Network check
+      const providerNetwork = await (signer as any)?.provider?.getNetwork?.();
+      if (providerNetwork && Number(providerNetwork.chainId) !== 84532) {
+        throw new Error('Wrong network. Please switch to Base Sepolia (84532).');
+      }
+
+      // Prevent duplicates
+      if (await genaiContractService.nftImageExists(image.imageHash)) {
+        throw new Error('This image hash already exists in the NFT contract. Try generating a new image.');
+      }
+      if (image.vrfSeed && (await genaiContractService.nftVRFSeedUsed(image.vrfSeed))) {
+        throw new Error('This VRF seed was already used. Generate again.');
+      }
+
+      // Ensure price >= base
+      const baseMint = await genaiContractService.getBaseMintPrice();
+      const priceToUse = customMintPrice && Number(customMintPrice) > 0
+        ? (Number(customMintPrice) < Number(baseMint) ? baseMint : customMintPrice)
+        : baseMint;
+ 
       let tx;
-      if (customMintPrice && Number(customMintPrice) > 0) {
+      if (priceToUse !== baseMint) {
         tx = await genaiContractService.mintGenAINFTWithPrice(
           account!,
           image.prompt,
@@ -447,7 +491,7 @@ export const GenAIEnhanced = () => {
           image.style,
           image.size,
           image.vrfSeed || 0,
-          customMintPrice
+          priceToUse
         );
       } else {
         tx = await genaiContractService.mintGenAINFT(
@@ -459,34 +503,31 @@ export const GenAIEnhanced = () => {
           image.vrfSeed || 0
         );
       }
-
+ 
       toast({
         title: "Minting Started",
-        description: "Your NFT mint transaction has been submitted",
+        description: `Your NFT mint transaction has been submitted (value: ${priceToUse} ETH)`,
       });
-
+ 
       await tx.wait();
-
+ 
       toast({
         title: "NFT Minted!",
         description: "Your AI-generated NFT has been minted successfully",
       });
-
-      // Remove from preview and reload profile
-      closePreview();
-      await loadUserProfile();
-
-    } catch (error) {
-      console.error('Minting failed:', error);
-      toast({
-        title: "Minting Failed",
-        description: "Failed to mint NFT. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsMinting(false);
-    }
-  };
+ 
+       // Remove from preview and reload profile
+       closePreview();
+       await loadUserProfile();
+ 
+     } catch (error) {
+       console.error('Minting failed:', error);
+       const message = (error as any)?.reason || (error as any)?.shortMessage || (error as any)?.message || 'Failed to mint NFT';
+       toast({ title: "Minting Failed", description: message, variant: "destructive" });
+     } finally {
+       setIsMinting(false);
+     }
+   };
 
   // Get subscription type name
   const getSubscriptionTypeName = (subType: number) => {

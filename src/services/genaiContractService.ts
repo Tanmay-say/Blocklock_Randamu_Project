@@ -95,6 +95,9 @@ class GenAIContractService {
     storage: import.meta.env.VITE_GENAI_STORAGE_ADDRESS || ''
   };
 
+  // Admin wallet for fee collection (frontend env or fallback)
+  private adminWallet: string = (import.meta.env.VITE_ADMIN_WALLET as string) || '0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC';
+
   /**
    * Initialize contracts with signer
    */
@@ -112,6 +115,18 @@ class GenAIContractService {
     if (this.addresses.storage) {
       this.storageContract = new ethers.Contract(this.addresses.storage, GENAI_STORAGE_ABI, signer);
     }
+  }
+
+  /**
+   * Send a per-generation fee to the admin wallet
+   */
+  public async sendGenerationFee(feeInEth: string): Promise<ethers.TransactionResponse> {
+    if (!this.signer) {
+      throw new Error('Signer not initialized');
+    }
+    const value = ethers.parseEther(feeInEth);
+    const tx = await this.signer.sendTransaction({ to: this.adminWallet, value });
+    return tx;
   }
 
   /**
