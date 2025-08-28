@@ -3,7 +3,8 @@ import { ethers } from 'ethers';
 // Contract ABIs (simplified for key functions)
 export const AUCTION_HOUSE_ABI = [
   "function createAuction(address nft, uint256 tokenId, uint256 reserve, uint256 endBlock, uint256 depositPct) external",
-  "function commitBid(uint256 auctionId, bytes calldata ciphertext, bytes calldata condition, address refundTo) external payable",
+  // commitBid(auctionId, ciphertext, condition, callbackGasLimit)
+  "function commitBid(uint256 auctionId, bytes ciphertext, bytes condition, uint32 callbackGasLimit) external payable",
   "function decodeBid(uint256 auctionId, address bidder, uint256 amount) external",
   "function finalize(uint256 auctionId) external",
   "function getAuction(uint256 auctionId) external view returns (address nft, uint256 tokenId, uint256 reserve, uint256 endBlock, address seller, bool settled, address winner, uint256 winningBid, uint256 bidderCount)",
@@ -116,7 +117,8 @@ export class ContractService {
     auctionId: number,
     encryptedBid: string,
     condition: string,
-    depositAmount: string // in ETH
+    depositAmount: string, // in ETH
+    callbackGasLimit: number = 200000
   ) {
     const auctionHouse = this.getAuctionHouse();
     const depositWei = ethers.parseEther(depositAmount);
@@ -125,7 +127,7 @@ export class ContractService {
       auctionId,
       encryptedBid,
       condition,
-      ethers.ZeroAddress, // refundTo (use zero address for self)
+      callbackGasLimit,
       { value: depositWei }
     );
   }

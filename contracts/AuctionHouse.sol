@@ -356,6 +356,13 @@ contract AuctionHouse is AccessControl, ReentrancyGuard, ERC721Holder, AbstractB
             auction.bidders.length
         );
     }
+
+    /**
+     * @dev View helper to read configured deposit percentage for an auction
+     */
+    function getDepositPct(uint256 auctionId) external view returns (uint256) {
+        return auctions[auctionId].depositPct;
+    }
     
     function getBidder(uint256 auctionId, uint256 index) external view returns (address) {
         return auctions[auctionId].bidders[index];

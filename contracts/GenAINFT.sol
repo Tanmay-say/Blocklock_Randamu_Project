@@ -199,6 +199,7 @@ contract GenAINFT is ERC721, AccessControl, ReentrancyGuard {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         
         GenAIMetadata memory metadata = _genaiMetadata[tokenId];
+        string memory imageUri = _normalizeImageURI(metadata.imageHash);
         
         // Create JSON metadata
         string memory json = string(abi.encodePacked(
@@ -207,7 +208,7 @@ contract GenAINFT is ERC721, AccessControl, ReentrancyGuard {
             '", "description": "Soul-bound NFT for AI-generated image: ',
             metadata.prompt,
             '", "image": "',
-            metadata.imageHash,
+            imageUri,
             '", "attributes": [',
             '{"trait_type": "Prompt", "value": "',
             metadata.prompt,
@@ -232,6 +233,29 @@ contract GenAINFT is ERC721, AccessControl, ReentrancyGuard {
             "data:application/json;base64,",
             Base64.encode(bytes(json))
         ));
+    }
+
+    function _normalizeImageURI(string memory ref) internal pure returns (string memory) {
+        bytes memory b = bytes(ref);
+        if (b.length == 0) return ref;
+        // http or https
+        if (
+            (b.length >= 7 && b[0]=='h'&&b[1]=='t'&&b[2]=='t'&&b[3]=='p'&&b[4]=='s'&&b[5]==':'&&b[6]=='/') ||
+            (b.length >= 6 && b[0]=='h'&&b[1]=='t'&&b[2]=='t'&&b[3]=='p'&&b[4]==':'&&b[5]=='/')
+        ) {
+            return ref;
+        }
+        // ipfs://CID
+        if (b.length > 7 && b[0]=='i'&&b[1]=='p'&&b[2]=='f'&&b[3]=='s'&&b[4]==':'&&b[5]=='/'&&b[6]=='/') {
+            bytes memory cid = new bytes(b.length - 7);
+            for (uint256 i=7;i<b.length;i++){ cid[i-7]=b[i]; }
+            return string(abi.encodePacked('https://ipfs.io/ipfs/', string(cid)));
+        }
+        // bare CID (Qm... or b...)
+        if ((b[0]=='Q'&&b[1]=='m') || b[0]=='b') {
+            return string(abi.encodePacked('https://ipfs.io/ipfs/', ref));
+        }
+        return ref;
     }
     
     /**

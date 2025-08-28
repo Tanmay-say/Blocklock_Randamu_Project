@@ -124,9 +124,10 @@ export const BlockchainBidPanel: React.FC<BlockchainBidPanelProps> = ({
       );
 
       // Place bid on blockchain
-      const tx = await contractService.placeBid(
+      const tx = await contractService.commitBid(
         auctionId,
-        bidForm.bidAmount,
+        encryptedData.ciphertext,
+        encryptedData.condition,
         bidForm.depositAmount
       );
 
