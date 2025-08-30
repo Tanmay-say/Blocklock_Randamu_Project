@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NFT } from '@/data/nfts';
@@ -17,6 +17,22 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
   const navigate = useNavigate();
   const { isConnected, account } = useWallet();
   const { hasUserBidOnNFT } = useNFT();
+  const [isAuctionExpired, setIsAuctionExpired] = useState(false);
+
+  // Check if auction has expired
+  useEffect(() => {
+    if (nft.status === 'auction' && nft.auctionEndTime) {
+      const checkExpiration = () => {
+        const now = new Date().getTime();
+        const endTime = new Date(nft.auctionEndTime!).getTime();
+        setIsAuctionExpired(now >= endTime);
+      };
+
+      checkExpiration();
+      const interval = setInterval(checkExpiration, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [nft.auctionEndTime, nft.status]);
 
   const handlePlaceBid = () => {
     if (!isConnected) {
@@ -43,7 +59,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, expired = false) => {
+    if (status === 'auction' && expired) {
+      return 'bg-red-900/20 text-red-400 border border-red-700/30';
+    }
+    
     switch (status) {
       case 'available':
         return 'bg-green-900/20 text-green-400 border border-green-700/30';
@@ -54,6 +74,13 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
       default:
         return 'bg-gray-900/20 text-gray-400 border border-gray-700/30';
     }
+  };
+
+  const getStatusText = (status: string, expired = false) => {
+    if (status === 'auction' && expired) {
+      return 'Ended';
+    }
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   // Check if current user has already bid on this NFT
@@ -76,8 +103,8 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
               You Own This
             </Badge>
           ) : (
-            <Badge className={getStatusColor(nft.status)}>
-              {nft.status.charAt(0).toUpperCase() + nft.status.slice(1)}
+            <Badge className={getStatusColor(nft.status, isAuctionExpired)}>
+              {getStatusText(nft.status, isAuctionExpired)}
             </Badge>
           )}
         </div>
@@ -159,7 +186,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, showBidButton = true }) =
 
                                     {/* Auction NFTs - Place Bid Button */}
                         {nft.status === 'auction' && (
-                          userHasBid ? (
+                          isAuctionExpired ? (
+                            <Button 
+                              className="w-full bg-red-600 text-white cursor-not-allowed"
+                              variant="outline"
+                              disabled
+                            >
+                              Auction Ended
+                            </Button>
+                          ) : userHasBid ? (
                             <Button 
                               className={`w-full cursor-not-allowed ${
                                 isHighestBidder 

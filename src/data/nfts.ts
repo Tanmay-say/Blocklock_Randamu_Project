@@ -134,8 +134,8 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-15T23:59:59Z",
-    currentBids: 2,
+    auctionEndTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
+    currentBids: 3,
     downloadable: true,
     downloadPrice: 0.002
   },
@@ -156,7 +156,7 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-20T23:59:59Z",
+    auctionEndTime: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(), // 5 hours from now
     currentBids: 1,
     downloadable: true,
     downloadPrice: 0.001
@@ -198,8 +198,8 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-25T23:59:59Z",
-    currentBids: 3,
+    auctionEndTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago (ENDED)
+    currentBids: 5,
     downloadable: true,
     downloadPrice: 0.001
   },
@@ -240,8 +240,8 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-03-01T23:59:59Z",
-    currentBids: 2,
+    auctionEndTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now (ENDING SOON)
+    currentBids: 7,
     downloadable: true,
     downloadPrice: 0.001
   },
@@ -302,7 +302,7 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-10T23:59:59Z",
+    auctionEndTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(), // 12 hours from now
     currentBids: 1,
     downloadable: true,
     downloadPrice: 0.002
@@ -344,7 +344,7 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-05T23:59:59Z",
+    auctionEndTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
     currentBids: 2,
     downloadable: true,
     downloadPrice: 0.002
@@ -386,7 +386,7 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-02-01T23:59:59Z",
+    auctionEndTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago (ENDED)
     currentBids: 3,
     downloadable: true,
     downloadPrice: 0.002
@@ -428,7 +428,7 @@ export const nfts: NFT[] = [
       { trait_type: "Rarity", value: "Common" }
     ],
     status: 'auction',
-    auctionEndTime: "2024-01-25T23:59:59Z",
+    auctionEndTime: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(), // 6 hours from now
     currentBids: 2,
     downloadable: true,
     downloadPrice: 0.002

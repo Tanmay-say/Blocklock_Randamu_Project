@@ -84,7 +84,7 @@ const Casino = () => {
   const initializeContract = async () => {
     try {
       console.log('Initializing SlotMachine contract...');
-      console.log('Contract address:', process.env.VITE_SLOT_MACHINE_ADDRESS);
+      console.log('Contract address:', import.meta.env.VITE_SLOT_MACHINE_ADDRESS);
       
       const network = await provider.getNetwork();
       console.log('Provider network:', network);

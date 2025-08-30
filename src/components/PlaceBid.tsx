@@ -26,6 +26,7 @@ export const PlaceBid: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [isAuctionExpired, setIsAuctionExpired] = useState(false);
 
 
   useEffect(() => {
@@ -40,11 +41,44 @@ export const PlaceBid: React.FC = () => {
           return;
         }
         
+        // Check if auction has expired
+        if (nftData.auctionEndTime) {
+          const now = new Date().getTime();
+          const endTime = new Date(nftData.auctionEndTime).getTime();
+          if (now >= endTime) {
+            setIsAuctionExpired(true);
+            setError('This auction has ended. You can no longer place bids.');
+            return;
+          }
+        }
+        
         // Set minimum bid amount (base price)
         setBidAmount(nftData.price.toFixed(4));
       }
     }
   }, [id, getNFTById]);
+
+  // Real-time auction expiration check
+  useEffect(() => {
+    if (!nft?.auctionEndTime) return;
+
+    const checkExpiration = () => {
+      const now = new Date().getTime();
+      const endTime = new Date(nft.auctionEndTime).getTime();
+      if (now >= endTime && !isAuctionExpired) {
+        setIsAuctionExpired(true);
+        setError('This auction has ended. You can no longer place bids.');
+      }
+    };
+
+    // Check immediately
+    checkExpiration();
+
+    // Check every second
+    const interval = setInterval(checkExpiration, 1000);
+
+    return () => clearInterval(interval);
+  }, [nft?.auctionEndTime, isAuctionExpired]);
 
 
 
@@ -75,6 +109,23 @@ export const PlaceBid: React.FC = () => {
     if (!account) {
       setError('Wallet account not found');
       return;
+    }
+
+    // Check if auction has expired
+    if (isAuctionExpired) {
+      setError('This auction has ended. You can no longer place bids.');
+      return;
+    }
+
+    // Double-check auction expiration before proceeding
+    if (nft.auctionEndTime) {
+      const now = new Date().getTime();
+      const endTime = new Date(nft.auctionEndTime).getTime();
+      if (now >= endTime) {
+        setIsAuctionExpired(true);
+        setError('This auction has ended. You can no longer place bids.');
+        return;
+      }
     }
 
     // Check if user has already bid on this NFT
@@ -267,6 +318,7 @@ export const PlaceBid: React.FC = () => {
                             <AuctionCountdown 
                               endTime={nft.auctionEndTime}
                               onExpired={() => {
+                                setIsAuctionExpired(true);
                                 setError('This auction has ended. You can no longer place bids.');
                               }}
                             />
@@ -383,11 +435,11 @@ export const PlaceBid: React.FC = () => {
                         
                         <Button
                           onClick={handlePlaceBid}
-                          disabled={isLoading || !bidAmount || parseFloat(bidAmount) < nft.price}
-                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                          disabled={isLoading || !bidAmount || parseFloat(bidAmount) < nft.price || isAuctionExpired}
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                           size="lg"
                         >
-                          {isLoading ? 'Processing...' : 'Place Bid'}
+                          {isLoading ? 'Processing...' : isAuctionExpired ? 'Auction Ended' : 'Place Bid'}
                         </Button>
                       </div>
                       
