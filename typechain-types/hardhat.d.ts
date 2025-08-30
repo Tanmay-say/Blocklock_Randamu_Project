@@ -146,6 +146,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SimpleMarketplace__factory>;
     getContractFactory(
+      name: "SlotMachine",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SlotMachine__factory>;
+    getContractFactory(
       name: "TestNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestNFT__factory>;
@@ -320,6 +324,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SimpleMarketplace>;
     getContractAt(
+      name: "SlotMachine",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SlotMachine>;
+    getContractAt(
       name: "TestNFT",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -463,6 +472,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SimpleMarketplace>;
     deployContract(
+      name: "SlotMachine",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SlotMachine>;
+    deployContract(
       name: "TestNFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestNFT>;
@@ -636,6 +649,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SimpleMarketplace>;
+    deployContract(
+      name: "SlotMachine",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SlotMachine>;
     deployContract(
       name: "TestNFT",
       args: any[],

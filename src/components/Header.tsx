@@ -56,6 +56,12 @@ export const Header = () => {
             GenAI
           </Link>
           <Link 
+            to="/casino" 
+            className={`transition-colors text-lg flex items-center gap-2 ${isActive('/casino') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+          >
+            🎰 Casino
+          </Link>
+          <Link 
             to="/about" 
             className={`transition-colors text-lg ${isActive('/about') ? 'text-primary' : 'text-foreground hover:text-primary'}`}
           >

@@ -54,6 +54,27 @@ export const NFTProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [nfts]);
 
+  // Clear localStorage to ensure consistency across browser profiles
+  const clearLocalStorage = () => {
+    try {
+      localStorage.removeItem('nft_favorites');
+      localStorage.removeItem('nft_viewed');
+      localStorage.removeItem('nft_purchased');
+      // Add any other localStorage keys that might be causing inconsistency
+    } catch (error) {
+      console.warn('Failed to clear localStorage:', error);
+    }
+  };
+
+  // Initialize with consistent data - only run once on mount
+  useEffect(() => {
+    // Clear any existing localStorage data to ensure consistency
+    clearLocalStorage();
+    
+    // Set the NFTs from our data file
+    setNfts(initialNFTs);
+  }, []); // Empty dependency array ensures this only runs once
+
   const addNFT = (nft: NFT) => {
     console.log('NFTContext: Adding NFT:', nft.name);
     setNfts(prevNfts => [...prevNfts, nft]);
@@ -93,8 +114,15 @@ export const NFTProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const resetNFTs = () => {
-    // Reset to initial data and clear localStorage
-    localStorage.removeItem('nft-marketplace-data');
+    // Reset to initial data and clear all localStorage
+    try {
+      localStorage.removeItem('nft-marketplace-data');
+      localStorage.removeItem('nft_favorites');
+      localStorage.removeItem('nft_viewed');
+      localStorage.removeItem('nft_purchased');
+    } catch (error) {
+      console.warn('Failed to clear localStorage:', error);
+    }
     setNfts(initialNFTs);
     console.log('NFTContext: Reset to initial', initialNFTs.length, 'NFTs');
   };

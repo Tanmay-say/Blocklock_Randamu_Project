@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "D:\\NGT market\\contracts\\AuctionHouse.sol": {
-      "lastModificationDate": 1756054288028,
-      "contentHash": "5935516f86f91a77475d470e70dbd5f2",
+      "lastModificationDate": 1756382752506,
+      "contentHash": "6205bb78ab666a5664e5b7c6c8e6fb04",
       "sourceName": "contracts/AuctionHouse.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -47,10 +47,10 @@
         "AuctionHouse"
       ]
     },
-    "D:\\NGT market\\contracts\\interfaces\\IBlocklockReceiver.sol": {
-      "lastModificationDate": 1755626388832,
-      "contentHash": "a08449c676ba75adf9d063606d244c2f",
-      "sourceName": "contracts/interfaces/IBlocklockReceiver.sol",
+    "D:\\NGT market\\contracts\\interfaces\\IRandamuVRF.sol": {
+      "lastModificationDate": 1755626388840,
+      "contentHash": "b3ee0bb8000c0aed50ea9d450b0a5632",
+      "sourceName": "contracts/interfaces/IRandamuVRF.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -81,7 +81,7 @@
         "^0.8.24"
       ],
       "artifacts": [
-        "IBlocklockReceiver"
+        "IRandamuVRF"
       ]
     },
     "D:\\NGT market\\contracts\\WinnerSBT.sol": {
@@ -126,10 +126,51 @@
         "WinnerSBT"
       ]
     },
-    "D:\\NGT market\\contracts\\interfaces\\IRandamuVRF.sol": {
-      "lastModificationDate": 1755626388840,
-      "contentHash": "b3ee0bb8000c0aed50ea9d450b0a5632",
-      "sourceName": "contracts/interfaces/IRandamuVRF.sol",
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\AbstractBlocklockReceiver.sol": {
+      "lastModificationDate": 1756054141844,
+      "contentHash": "bd1d7ecd6c0712c5d407bfde3f6f09df",
+      "sourceName": "blocklock-solidity/src/AbstractBlocklockReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IBlocklockReceiver.sol",
+        "./interfaces/IBlocklockSender.sol",
+        "./access/ConfirmedOwner.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "AbstractBlocklockReceiver"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
+      "lastModificationDate": 1755627425156,
+      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -157,10 +198,10 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.24"
+        "^0.8.20"
       ],
       "artifacts": [
-        "IRandamuVRF"
+        "ReentrancyGuard"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\access\\AccessControl.sol": {
@@ -204,10 +245,10 @@
         "AccessControl"
       ]
     },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
-      "lastModificationDate": 1755627425156,
-      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\libraries\\TypesLib.sol": {
+      "lastModificationDate": 1756054146224,
+      "contentHash": "22479b9a8e4f49ce32f97e5fb916031b",
+      "sourceName": "blocklock-solidity/src/libraries/TypesLib.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -233,12 +274,14 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "./BLS.sol"
+      ],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8"
       ],
       "artifacts": [
-        "ReentrancyGuard"
+        "TypesLib"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721.sol": {
@@ -319,10 +362,10 @@
         "ERC721Holder"
       ]
     },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1755627425141,
-      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
-      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Base64.sol": {
+      "lastModificationDate": 1755627424704,
+      "contentHash": "e94470e74f65d3ba43da7bf2ac027b38",
+      "sourceName": "@openzeppelin/contracts/utils/Base64.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -348,14 +391,12 @@
           }
         }
       },
-      "imports": [
-        "../utils/Context.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "Ownable"
+        "Base64"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
@@ -397,43 +438,6 @@
       ],
       "artifacts": [
         "Strings"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Base64.sol": {
-      "lastModificationDate": 1755627424704,
-      "contentHash": "e94470e74f65d3ba43da7bf2ac027b38",
-      "sourceName": "@openzeppelin/contracts/utils/Base64.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Base64"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721.sol": {
@@ -481,10 +485,10 @@
         "ERC721"
       ]
     },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1755627424738,
-      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
-      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeCast.sol": {
+      "lastModificationDate": 1755627425156,
+      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -515,120 +519,7 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "Context"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\introspection\\ERC165.sol": {
-      "lastModificationDate": 1755627424922,
-      "contentHash": "0906d06dca25210d4696dcef6dad2909",
-      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC165"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\access\\IAccessControl.sol": {
-      "lastModificationDate": 1755627425029,
-      "contentHash": "def1e8f7b6cac577cf2600655bf3bdf8",
-      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        ">=0.8.4"
-      ],
-      "artifacts": [
-        "IAccessControl"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\introspection\\IERC165.sol": {
-      "lastModificationDate": 1755627425061,
-      "contentHash": "7074c93b1ea0a122063f26ddd1db1032",
-      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        ">=0.4.16"
-      ],
-      "artifacts": [
-        "IERC165"
+        "SafeCast"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\math\\Math.sol": {
@@ -710,43 +601,6 @@
         "SignedMath"
       ]
     },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeCast.sol": {
-      "lastModificationDate": 1755627425156,
-      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
-      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SafeCast"
-      ]
-    },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Panic.sol": {
       "lastModificationDate": 1755627425151,
       "contentHash": "2133dc13536b4a6a98131e431fac59e1",
@@ -782,6 +636,156 @@
       ],
       "artifacts": [
         "Panic"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\introspection\\ERC165.sol": {
+      "lastModificationDate": 1755627424922,
+      "contentHash": "0906d06dca25210d4696dcef6dad2909",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1755627424738,
+      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\access\\IAccessControl.sol": {
+      "lastModificationDate": 1755627425029,
+      "contentHash": "def1e8f7b6cac577cf2600655bf3bdf8",
+      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.4"
+      ],
+      "artifacts": [
+        "IAccessControl"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\introspection\\IERC165.sol": {
+      "lastModificationDate": 1755627425061,
+      "contentHash": "7074c93b1ea0a122063f26ddd1db1032",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": [
+        "IERC165"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\interfaces\\draft-IERC6093.sol": {
@@ -821,6 +825,45 @@
         "IERC1155Errors",
         "IERC20Errors",
         "IERC721Errors"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\extensions\\IERC721Metadata.sol": {
+      "lastModificationDate": 1755627425109,
+      "contentHash": "136c64eca25bcb8a68f43ac6605559f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.2"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
       ]
     },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\utils\\ERC721Utils.sol": {
@@ -863,45 +906,6 @@
         "ERC721Utils"
       ]
     },
-    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\extensions\\IERC721Metadata.sol": {
-      "lastModificationDate": 1755627425109,
-      "contentHash": "136c64eca25bcb8a68f43ac6605559f9",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../IERC721.sol"
-      ],
-      "versionPragmas": [
-        ">=0.6.2"
-      ],
-      "artifacts": [
-        "IERC721Metadata"
-      ]
-    },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Receiver.sol": {
       "lastModificationDate": 1755627425109,
       "contentHash": "d61660a41ce200e99816e4734f7fd202",
@@ -939,165 +943,6 @@
         "IERC721Receiver"
       ]
     },
-    "D:\\NGT market\\contracts\\TestNFT.sol": {
-      "lastModificationDate": 1756060806763,
-      "contentHash": "045c1b393b8c8bf78a55a0328c61d66a",
-      "sourceName": "contracts/TestNFT.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "TestNFT"
-      ]
-    },
-    "D:\\NGT market\\contracts\\MockRandamuVRF.sol": {
-      "lastModificationDate": 1755626388840,
-      "contentHash": "32efd4bb5d3c899e185e62bbd7238e3f",
-      "sourceName": "contracts/MockRandamuVRF.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./interfaces/IRandamuVRF.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "MockRandamuVRF"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\AbstractBlocklockReceiver.sol": {
-      "lastModificationDate": 1756054141844,
-      "contentHash": "bd1d7ecd6c0712c5d407bfde3f6f09df",
-      "sourceName": "blocklock-solidity/src/AbstractBlocklockReceiver.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./interfaces/IBlocklockReceiver.sol",
-        "./interfaces/IBlocklockSender.sol",
-        "./access/ConfirmedOwner.sol"
-      ],
-      "versionPragmas": [
-        "^0.8"
-      ],
-      "artifacts": [
-        "AbstractBlocklockReceiver"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\libraries\\TypesLib.sol": {
-      "lastModificationDate": 1756054146224,
-      "contentHash": "22479b9a8e4f49ce32f97e5fb916031b",
-      "sourceName": "blocklock-solidity/src/libraries/TypesLib.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./BLS.sol"
-      ],
-      "versionPragmas": [
-        "^0.8"
-      ],
-      "artifacts": [
-        "TypesLib"
-      ]
-    },
     "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IBlocklockReceiver.sol": {
       "lastModificationDate": 1756054144399,
       "contentHash": "a0401d06f5aaa6c619c6f1e00f9bbe31",
@@ -1133,45 +978,6 @@
       ],
       "artifacts": [
         "IBlocklockReceiver"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwner.sol": {
-      "lastModificationDate": 1756054142485,
-      "contentHash": "6b00df07c1d4647ddeeaa056beedc00e",
-      "sourceName": "blocklock-solidity/src/access/ConfirmedOwner.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./ConfirmedOwnerWithProposal.sol"
-      ],
-      "versionPragmas": [
-        "^0.8"
-      ],
-      "artifacts": [
-        "ConfirmedOwner"
       ]
     },
     "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IBlocklockSender.sol": {
@@ -1214,10 +1020,10 @@
         "IBlocklockSender"
       ]
     },
-    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwnerWithProposal.sol": {
-      "lastModificationDate": 1756054142489,
-      "contentHash": "1b6acd09a7df85da300774db271f55b5",
-      "sourceName": "blocklock-solidity/src/access/ConfirmedOwnerWithProposal.sol",
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwner.sol": {
+      "lastModificationDate": 1756054142485,
+      "contentHash": "6b00df07c1d4647ddeeaa056beedc00e",
+      "sourceName": "blocklock-solidity/src/access/ConfirmedOwner.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -1244,50 +1050,13 @@
         }
       },
       "imports": [
-        "../interfaces/IOwnable.sol"
+        "./ConfirmedOwnerWithProposal.sol"
       ],
       "versionPragmas": [
         "^0.8"
       ],
       "artifacts": [
-        "ConfirmedOwnerWithProposal"
-      ]
-    },
-    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IOwnable.sol": {
-      "lastModificationDate": 1756054144811,
-      "contentHash": "c381d0ab8b97a2b25a7bbc6ad11445af",
-      "sourceName": "blocklock-solidity/src/interfaces/IOwnable.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8"
-      ],
-      "artifacts": [
-        "IOwnable"
+        "ConfirmedOwner"
       ]
     },
     "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\ISubscription.sol": {
@@ -1405,6 +1174,82 @@
         "ModexpSqrt"
       ]
     },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\access\\ConfirmedOwnerWithProposal.sol": {
+      "lastModificationDate": 1756054142489,
+      "contentHash": "1b6acd09a7df85da300774db271f55b5",
+      "sourceName": "blocklock-solidity/src/access/ConfirmedOwnerWithProposal.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IOwnable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "ConfirmedOwnerWithProposal"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\blocklock-solidity\\src\\interfaces\\IOwnable.sol": {
+      "lastModificationDate": 1756054144811,
+      "contentHash": "c381d0ab8b97a2b25a7bbc6ad11445af",
+      "sourceName": "blocklock-solidity/src/interfaces/IOwnable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8"
+      ],
+      "artifacts": [
+        "IOwnable"
+      ]
+    },
     "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\utils\\Pausable.sol": {
       "lastModificationDate": 1755627425151,
       "contentHash": "0d47b53e10b1985efbb396f937626279",
@@ -1442,6 +1287,87 @@
       ],
       "artifacts": [
         "Pausable"
+      ]
+    },
+    "D:\\NGT market\\contracts\\SlotMachine.sol": {
+      "lastModificationDate": 1756563214881,
+      "contentHash": "29f3784bc3e88866f9ca2c5a1838d1d7",
+      "sourceName": "contracts/SlotMachine.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "SlotMachine"
+      ]
+    },
+    "D:\\NGT market\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1755627425141,
+      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable"
       ]
     },
     "D:\\NGT market\\contracts\\SimpleMarketplace.sol": {
@@ -1485,6 +1411,46 @@
         "SimpleMarketplace"
       ]
     },
+    "D:\\NGT market\\contracts\\TestNFT.sol": {
+      "lastModificationDate": 1756060806763,
+      "contentHash": "045c1b393b8c8bf78a55a0328c61d66a",
+      "sourceName": "contracts/TestNFT.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TestNFT"
+      ]
+    },
     "D:\\NGT market\\contracts\\GenAISubscription.sol": {
       "lastModificationDate": 1756146007712,
       "contentHash": "c1234e67b36a976a9d25f0a560af4f77",
@@ -1526,8 +1492,8 @@
       ]
     },
     "D:\\NGT market\\contracts\\GenAINFT.sol": {
-      "lastModificationDate": 1756145846346,
-      "contentHash": "39fe8f011642caa8e64e858d13bc73fa",
+      "lastModificationDate": 1756384433058,
+      "contentHash": "ccdca45884d59f9cd4114488bef8864b",
       "sourceName": "contracts/GenAINFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1569,6 +1535,45 @@
         "GenAINFT"
       ]
     },
+    "D:\\NGT market\\contracts\\MockRandamuVRF.sol": {
+      "lastModificationDate": 1755626388840,
+      "contentHash": "32efd4bb5d3c899e185e62bbd7238e3f",
+      "sourceName": "contracts/MockRandamuVRF.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IRandamuVRF.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "MockRandamuVRF"
+      ]
+    },
     "D:\\NGT market\\contracts\\GenAIImageStorage.sol": {
       "lastModificationDate": 1756145865173,
       "contentHash": "e8a873e0ec6c3ec623da8d3a31783dc4",
@@ -1608,6 +1613,43 @@
       ],
       "artifacts": [
         "GenAIImageStorage"
+      ]
+    },
+    "D:\\NGT market\\contracts\\interfaces\\IBlocklockReceiver.sol": {
+      "lastModificationDate": 1755626388832,
+      "contentHash": "a08449c676ba75adf9d063606d244c2f",
+      "sourceName": "contracts/interfaces/IBlocklockReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IBlocklockReceiver"
       ]
     }
   }

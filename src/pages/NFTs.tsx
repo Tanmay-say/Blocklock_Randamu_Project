@@ -11,7 +11,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { Search, Filter, Grid3X3, List } from 'lucide-react';
 
 export const NFTs: React.FC = () => {
-  const { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag } = useNFT();
+  const { nfts, getNFTsByStatus, getNFTsByCollection, getNFTsByTag, resetNFTs } = useNFT();
   const { account } = useWallet();
   
   // Debug logging for NFT visibility
@@ -168,6 +168,20 @@ export const NFTs: React.FC = () => {
 
             {/* Filter Options */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Reset Button */}
+              <div className="flex items-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    clearFilters();
+                    resetNFTs();
+                  }}
+                  className="border-nft-border text-muted-foreground hover:bg-background/50 w-full"
+                >
+                  Reset All Data
+                </Button>
+              </div>
               {/* Status Filter */}
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Status</label>

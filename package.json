@@ -21,7 +21,7 @@
     "demo:auction": "hardhat run scripts/createAuctionAndBid.ts --network base-sepolia"
   },
   "dependencies": {
-    "@chainlink/contracts": "^1.4.0",
+    "@chainlink/contracts": "^0.8.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@openzeppelin/contracts": "^5.4.0",

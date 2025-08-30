@@ -35,11 +35,11 @@ env.local
 .env.test.local
 .env.production.local
 # .env.local.template should be committed as a safe template
-
+env.local
 # Hardhat
-cache
-artifacts
-typechain-types
+/cache
+/artifacts
+/typechain-types
 coverage
 coverage.json
 

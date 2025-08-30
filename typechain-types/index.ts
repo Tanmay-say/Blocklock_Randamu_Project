@@ -72,6 +72,8 @@ export type { MockRandamuVRF } from "./contracts/MockRandamuVRF";
 export { MockRandamuVRF__factory } from "./factories/contracts/MockRandamuVRF__factory";
 export type { SimpleMarketplace } from "./contracts/SimpleMarketplace";
 export { SimpleMarketplace__factory } from "./factories/contracts/SimpleMarketplace__factory";
+export type { SlotMachine } from "./contracts/SlotMachine";
+export { SlotMachine__factory } from "./factories/contracts/SlotMachine__factory";
 export type { TestNFT } from "./contracts/TestNFT";
 export { TestNFT__factory } from "./factories/contracts/TestNFT__factory";
 export type { WinnerSBT } from "./contracts/WinnerSBT";

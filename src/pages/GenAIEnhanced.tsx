@@ -12,10 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useWallet } from '@/contexts/WalletContext';
 import { 
   Bot, Sparkles, Image, Crown, Lock, Shield, 
-  Zap, Timer, Coins, Star, AlertTriangle, CheckCircle, X, Wallet 
+  Zap, Timer, Coins, Star, AlertTriangle, CheckCircle, X, Wallet, ShoppingCart, Download, Eye 
 } from "lucide-react";
 import { geminiService } from '@/services/geminiService';
 import { genaiContractService } from '@/services/genaiContractService';
+import PaymentModal from '@/components/PaymentModal';
 
 interface UserProfile {
   subscription: {
@@ -53,7 +54,6 @@ export const GenAIEnhanced = () => {
   // State
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isMinting, setIsMinting] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState("digital-art");
   const [selectedSize, setSelectedSize] = useState("1024x1024");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -61,8 +61,9 @@ export const GenAIEnhanced = () => {
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [newImageIndex, setNewImageIndex] = useState<number | null>(null);
-  const [customMintPrice, setCustomMintPrice] = useState<string>("");
   const [antiScreenshotOn, setAntiScreenshotOn] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedImageForPayment, setSelectedImageForPayment] = useState<GeneratedImage | null>(null);
   const generationFee = (import.meta.env.VITE_GENAI_GENERATION_FEE_ETH as string) || "0.0001";
  
   // Security refs
@@ -77,16 +78,16 @@ export const GenAIEnhanced = () => {
     try { const v = getLocalUsage() + 1; localStorage.setItem(localUsageKey, String(v)); } catch {}
   };
 
-  // Art styles with enhanced options
+  // Art styles focused on metaverse and neon themes
   const artStyles = [
     { id: "digital-art", name: "Digital Art", description: "Modern digital illustrations", premium: false },
     { id: "pixel-art", name: "Pixel Art", description: "Retro 8-bit style graphics", premium: false },
-    { id: "watercolor", name: "Watercolor", description: "Soft, flowing watercolor paintings", premium: false },
-    { id: "oil-painting", name: "Oil Painting", description: "Classical oil painting style", premium: true },
-    { id: "anime", name: "Anime", description: "Japanese anime and manga style", premium: true },
-    { id: "cyberpunk", name: "Cyberpunk", description: "Futuristic, high-tech aesthetic", premium: true },
-    { id: "surreal", name: "Surreal", description: "Abstract surrealistic art", premium: true },
-    { id: "photorealistic", name: "Photorealistic", description: "Ultra-realistic photography style", premium: true },
+    { id: "cyberpunk", name: "Cyberpunk", description: "Futuristic, high-tech aesthetic", premium: false },
+    { id: "neon", name: "Neon Art", description: "Vibrant neon lighting and glow effects", premium: false },
+    { id: "metaverse", name: "Metaverse", description: "Digital world and virtual reality scenes", premium: true },
+    { id: "holographic", name: "Holographic", description: "3D holographic and transparent effects", premium: true },
+    { id: "futuristic", name: "Futuristic", description: "Advanced technology and sci-fi scenes", premium: true },
+    { id: "digital-abstract", name: "Digital Abstract", description: "Abstract geometric and pattern art", premium: true },
   ];
 
   const imageSizes = [
@@ -444,90 +445,13 @@ export const GenAIEnhanced = () => {
     }
   };
 
-  // Mint NFT
-  const mintNFT = async (image: GeneratedImage) => {
-    if (!genaiContractService.isInitialized()) {
-      toast({
-        title: "Service Not Ready",
-        description: "Please connect your wallet and try again",
-        variant: "destructive"
-      });
-      return;
-    }
-    if (!isConnected || !account) {
-      toast({ title: "Connect Wallet", description: "Please connect your wallet to mint.", variant: "destructive" });
-      return;
-    }
- 
-    setIsMinting(true);
- 
-    try {
-      // Network check
-      const providerNetwork = await (signer as any)?.provider?.getNetwork?.();
-      if (providerNetwork && Number(providerNetwork.chainId) !== 84532) {
-        throw new Error('Wrong network. Please switch to Base Sepolia (84532).');
-      }
+    {/* NFT minting functionality removed */}
 
-      // Prevent duplicates
-      if (await genaiContractService.nftImageExists(image.imageHash)) {
-        throw new Error('This image hash already exists in the NFT contract. Try generating a new image.');
-      }
-      if (image.vrfSeed && (await genaiContractService.nftVRFSeedUsed(image.vrfSeed))) {
-        throw new Error('This VRF seed was already used. Generate again.');
-      }
-
-      // Ensure price >= base
-      const baseMint = await genaiContractService.getBaseMintPrice();
-      const priceToUse = customMintPrice && Number(customMintPrice) > 0
-        ? (Number(customMintPrice) < Number(baseMint) ? baseMint : customMintPrice)
-        : baseMint;
- 
-      let tx;
-      if (priceToUse !== baseMint) {
-        tx = await genaiContractService.mintGenAINFTWithPrice(
-          account!,
-          image.prompt,
-          image.imageHash,
-          image.style,
-          image.size,
-          image.vrfSeed || 0,
-          priceToUse
-        );
-      } else {
-        tx = await genaiContractService.mintGenAINFT(
-          account!,
-          image.prompt,
-          image.imageHash,
-          image.style,
-          image.size,
-          image.vrfSeed || 0
-        );
-      }
- 
-      toast({
-        title: "Minting Started",
-        description: `Your NFT mint transaction has been submitted (value: ${priceToUse} ETH)`,
-      });
- 
-      await tx.wait();
- 
-      toast({
-        title: "NFT Minted!",
-        description: "Your AI-generated NFT has been minted successfully",
-      });
- 
-       // Remove from preview and reload profile
-       closePreview();
-       await loadUserProfile();
- 
-     } catch (error) {
-       console.error('Minting failed:', error);
-       const message = (error as any)?.reason || (error as any)?.shortMessage || (error as any)?.message || 'Failed to mint NFT';
-       toast({ title: "Minting Failed", description: message, variant: "destructive" });
-     } finally {
-       setIsMinting(false);
-     }
-   };
+  // Handle payment and download
+  const handlePaymentAndDownload = (image: GeneratedImage) => {
+    setSelectedImageForPayment(image);
+    setIsPaymentModalOpen(true);
+  };
 
   // Get subscription type name
   const getSubscriptionTypeName = (subType: number) => {
@@ -553,11 +477,29 @@ export const GenAIEnhanced = () => {
                 <span className="text-primary">GenAI</span> NFT Studio
               </h1>
             </div>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Create unique AI-generated Soul-Bound NFTs with advanced AI models. 
-              Every image is verified for uniqueness using VRF technology.
-            </p>
+                         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+               Create unique AI-generated metaverse and neon digital art with advanced AI models. 
+               Every image is verified for uniqueness using VRF technology.
+               Download your creations instantly after payment.
+             </p>
           </div>
+
+          {/* New Feature Banner */}
+          <Card className="mb-8 border-green-500/20 bg-green-500/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 text-center justify-center">
+                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-500">🎉 New Feature Available!</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Now you can buy and download your AI-generated images instantly. No subscription required!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Connection Prompt for Non-Connected Users */}
           {!isConnected && (
@@ -669,9 +611,9 @@ export const GenAIEnhanced = () => {
                   <Sparkles className="w-5 h-5" />
                   AI Image Generation
                 </CardTitle>
-                <CardDescription>
-                  Create unique AI-generated images and mint them as Soul-Bound NFTs
-                </CardDescription>
+                                 <CardDescription>
+                   Create unique AI-generated images and download them instantly
+                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Prompt Input */}
@@ -792,9 +734,9 @@ export const GenAIEnhanced = () => {
                   <Image className="w-5 h-5" />
                   Your Creations
                 </CardTitle>
-                <CardDescription>
-                  Generated images ready for minting
-                </CardDescription>
+                                 <CardDescription>
+                   Generated images ready for download
+                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {isGenerating ? (
@@ -846,11 +788,11 @@ export const GenAIEnhanced = () => {
                     <p className="text-muted-foreground">No images generated yet</p>
                     <p className="text-sm text-muted-foreground">Create your first AI masterpiece!</p>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {generatedImages.map((image, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity relative group">
+                                 ) : (
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {generatedImages.map((image, index) => (
+                       <div key={index} className={`space-y-3 bg-card/20 rounded-lg p-4 border border-border/50 hover:bg-card/30 transition-all duration-200 hover:shadow-lg ${index === newImageIndex ? 'animate-in slide-in-from-bottom-2 duration-500' : ''}`}>
+                         <div className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-all duration-200 relative group">
                           <img 
                             src={image.imageUrl} 
                             alt={image.prompt}
@@ -868,27 +810,36 @@ export const GenAIEnhanced = () => {
                             <div className="text-white text-sm font-medium">Click to Preview</div>
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground truncate">{image.prompt}</p>
-                          <div className="flex justify-between items-center gap-2">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
                             <Badge variant="secondary" className="text-xs">
                               {image.style}
                             </Badge>
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                onClick={() => openPreview(image)}
-                                variant="outline"
-                              >
-                                Preview
-                              </Button>
-                              <Button 
-                                size="sm"
-                                onClick={() => mintNFT(image)}
-                              >
-                                Mint
-                              </Button>
-                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(image.timestamp).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{image.prompt}</p>
+                          <div className="flex gap-2 flex-wrap">
+                            <Button 
+                              size="sm" 
+                              onClick={() => openPreview(image)}
+                              variant="outline"
+                              className="flex-1 min-w-[80px] text-xs hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              Preview
+                            </Button>
+                                                            {/* Mint button removed - only download available */}
+                            <Button 
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handlePaymentAndDownload(image)}
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1 min-w-[120px] text-xs shadow-sm hover:shadow-md transition-all"
+                            >
+                              <ShoppingCart className="w-3 h-3 mr-1" />
+                              Buy & Download
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -1006,54 +957,87 @@ export const GenAIEnhanced = () => {
                     )}
                   </div>
 
-                  {/* Mint Actions */}
-                  <div className="flex flex-col gap-3 pt-4">
-                    <div className="flex items-center gap-3">
-                      <Label className="text-sm">Your mint price (ETH)</Label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        min="0"
-                        placeholder={userProfile?.pricing.mintPrice ?? '0.0005'}
-                        value={customMintPrice}
-                        onChange={(e) => setCustomMintPrice(e.target.value)}
-                        className="w-40 rounded-md bg-background border px-3 py-2 text-sm"
-                      />
-                    </div>
-                    <div className="flex gap-4">
-                      <Button 
-                        onClick={() => mintNFT(selectedImage)}
-                        disabled={isMinting}
-                        className="flex-1"
-                      >
-                        {isMinting ? (
-                          <div className="flex items-center gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Minting...
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <Coins className="w-4 h-4" />
-                            Mint as Soul-Bound NFT ({customMintPrice || userProfile?.pricing.mintPrice} ETH)
-                          </div>
-                        )}
-                      </Button>
-                      <Button variant="outline" onClick={closePreview}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
+                                     {/* Download Actions */}
+                   <div className="flex flex-col gap-3 pt-4">
+                     <div className="flex gap-4">
+                       <Button 
+                         variant="secondary"
+                         onClick={() => {
+                           closePreview();
+                           handlePaymentAndDownload(selectedImage);
+                         }}
+                         className="bg-green-600 hover:bg-green-700 flex-1"
+                       >
+                         <ShoppingCart className="w-4 h-4 mr-2" />
+                         Buy & Download
+                       </Button>
+                       <Button variant="outline" onClick={closePreview}>
+                         Cancel
+                       </Button>
+                     </div>
+                   </div>
                 </CardContent>
               </Card>
             </div>
           )}
 
-          {/* Features Section */}
+          {/* Pricing Section */}
           <div className="mt-20">
-            <h2 className="text-3xl font-bold text-white text-center mb-12">
-              Why Choose GenAI NFT Studio?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                         <h2 className="text-3xl font-bold text-white text-center mb-12">
+               Choose Your Metaverse Experience
+             </h2>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+              <Card className="text-center">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Image className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <CardTitle>Preview Only</CardTitle>
+                  <CardDescription>Free tier access</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-3xl font-bold">Free</div>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• 5 images per day</li>
+                    <li>• Basic art styles</li>
+                    <li>• Standard sizes</li>
+                    <li>• 24-hour preview access</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="text-center border-primary">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Download className="w-6 h-6 text-green-500" />
+                  </div>
+                  <CardTitle>Buy & Download</CardTitle>
+                  <CardDescription>Own your creations</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-3xl font-bold">0.005 ETH</div>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• One-time purchase</li>
+                    <li>• Instant download</li>
+                    <li>• High resolution</li>
+                    <li>• No restrictions</li>
+                  </ul>
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Get Started
+                  </Button>
+                </CardContent>
+              </Card>
+
+                             {/* NFT minting option removed */}
+            </div>
+
+            {/* Features Section */}
+            <div className="mt-20">
+                             <h2 className="text-3xl font-bold text-white text-center mb-12">
+                 Why Choose GenAI Metaverse Studio?
+               </h2>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
               <Card>
                 <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -1109,10 +1093,44 @@ export const GenAIEnhanced = () => {
                   </p>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader className="text-center">
+                  <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <ShoppingCart className="w-6 h-6 text-green-500" />
+                  </div>
+                  <CardTitle>Instant Purchase</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground">
+                    Buy and download your favorite AI-generated images instantly
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && selectedImageForPayment && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setSelectedImageForPayment(null);
+          }}
+          nftData={{
+            imageUrl: selectedImageForPayment.imageUrl,
+            prompt: selectedImageForPayment.prompt,
+            style: selectedImageForPayment.style,
+            size: selectedImageForPayment.size,
+            price: 0.005, // Base price for download
+            imageHash: selectedImageForPayment.imageHash
+          }}
+        />
+      )}
 
       <Footer />
     </div>

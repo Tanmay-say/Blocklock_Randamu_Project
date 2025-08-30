@@ -78,6 +78,7 @@ export interface AuctionHouseInterface extends Interface {
       | "getBidderCount"
       | "getDecodedBid"
       | "getDeposit"
+      | "getDepositPct"
       | "getRoleAdmin"
       | "getTaxCollected"
       | "grantRole"
@@ -233,6 +234,10 @@ export interface AuctionHouseInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getDeposit",
     values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getDepositPct",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -404,6 +409,10 @@ export interface AuctionHouseInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getDeposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getDepositPct",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getRoleAdmin",
     data: BytesLike
@@ -994,6 +1003,12 @@ export interface AuctionHouse extends BaseContract {
     "view"
   >;
 
+  getDepositPct: TypedContractMethod<
+    [auctionId: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
   getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
 
   getTaxCollected: TypedContractMethod<
@@ -1308,6 +1323,9 @@ export interface AuctionHouse extends BaseContract {
     [bigint],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "getDepositPct"
+  ): TypedContractMethod<[auctionId: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "getRoleAdmin"
   ): TypedContractMethod<[role: BytesLike], [string], "view">;

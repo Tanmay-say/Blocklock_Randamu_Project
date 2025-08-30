@@ -9,5 +9,6 @@ export type { GenAINFT } from "./GenAINFT";
 export type { GenAISubscription } from "./GenAISubscription";
 export type { MockRandamuVRF } from "./MockRandamuVRF";
 export type { SimpleMarketplace } from "./SimpleMarketplace";
+export type { SlotMachine } from "./SlotMachine";
 export type { TestNFT } from "./TestNFT";
 export type { WinnerSBT } from "./WinnerSBT";
