@@ -86,15 +86,21 @@ export class SlotMachineService {
         throw new Error('SlotMachine contract address not configured');
       }
 
-      // Check network
+      // Check network - Base Sepolia support
       const network = await provider.getNetwork();
-      console.log('Network detected:', network.name, 'Chain ID:', network.chainId.toString());
+      console.log('🌐 Network detected:', {
+        name: network.name,
+        chainId: network.chainId.toString(),
+        isBaseSepolia: network.chainId === 84532n
+      });
       
-      const allowedChainIds = [84532n, 1337n, 31337n];
+      const allowedChainIds = [84532n, 1337n, 31337n]; // Base Sepolia, Localhost
       
       if (!allowedChainIds.includes(network.chainId)) {
-        throw new Error(`Unsupported network. Please switch to Base Sepolia (84532). Currently on: ${network.name} (${network.chainId})`);
+        throw new Error(`❌ Unsupported network. Please switch to Base Sepolia (84532). Currently on Chain ID: ${network.chainId}`);
       }
+      
+      console.log('✅ Network check passed - proceeding with contract initialization');
 
       this.contract = new ethers.Contract(
         this.contractAddress,
@@ -102,12 +108,31 @@ export class SlotMachineService {
         this.signer
       );
 
-      // Test contract connection
+      // Test contract connection with detailed logging
+      console.log('🔗 Testing contract connection at:', this.contractAddress);
       try {
-        await this.contract.STAKE_AMOUNT();
-        console.log('✅ SlotMachine service initialized with contract:', this.contractAddress);
-      } catch (contractError) {
-        throw new Error(`Contract not found at ${this.contractAddress}. Please check deployment.`);
+        const stakeAmount = await this.contract.STAKE_AMOUNT();
+        const maxPlayers = await this.contract.MAX_PLAYERS_PER_ROUND();
+        const winPercentage = await this.contract.WIN_PERCENTAGE();
+        
+        console.log('✅ SlotMachine contract connected successfully!');
+        console.log('📊 Contract Config:', {
+          stakeAmount: ethers.formatEther(stakeAmount),
+          maxPlayers: maxPlayers.toString(),
+          winPercentage: winPercentage.toString()
+        });
+      } catch (contractError: any) {
+        console.error('❌ Contract connection failed:', {
+          address: this.contractAddress,
+          error: contractError.message,
+          code: contractError.code
+        });
+        
+        if (contractError.code === 'CALL_EXCEPTION') {
+          throw new Error(`Contract not deployed at ${this.contractAddress}. Please verify deployment on Base Sepolia.`);
+        } else {
+          throw new Error(`Contract connection failed: ${contractError.message}`);
+        }
       }
       
     } catch (error) {

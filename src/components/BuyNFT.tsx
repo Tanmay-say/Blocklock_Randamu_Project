@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from '@/contexts/WalletContext';
 import { useNFT } from '@/contexts/NFTContext';
-import { getContract, LOCAL_CONTRACT_ADDRESSES } from '@/lib/contracts';
+import { LOCAL_CONTRACT_ADDRESSES } from '@/lib/contracts';
 import { ethers } from 'ethers';
 import { ArrowLeft, ShoppingCart, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
@@ -21,7 +21,7 @@ export const BuyNFT: React.FC = () => {
   const { getNFTById, updateNFT } = useNFT();
   
   const [nft, setNft] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Removed unused isLoading state
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -56,12 +56,34 @@ export const BuyNFT: React.FC = () => {
     setError('');
 
     try {
-      // Check if user has enough balance
-      const balance = await signer.provider!.getBalance(account);
+      // Check if user has enough balance with retry logic for MetaMask rate limiting
+      let balance;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          balance = await signer.provider!.getBalance(account);
+          break;
+        } catch (balanceError: any) {
+          retryCount++;
+          if (balanceError.code === 'UNKNOWN_ERROR' && balanceError.error?.data?.cause?.isBrokenCircuitError) {
+            if (retryCount < maxRetries) {
+              console.log(`MetaMask rate limit hit, retrying... (${retryCount}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+              continue;
+            } else {
+              throw new Error('MetaMask is temporarily rate limited. Please wait a moment and try again.');
+            }
+          }
+          throw balanceError;
+        }
+      }
+      
       const priceInWei = ethers.parseEther(nft.price.toString());
       
-      if (balance < priceInWei) {
-        throw new Error(`Insufficient balance. You need ${nft.price} ETH but only have ${ethers.formatEther(balance)} ETH.`);
+      if (balance! < priceInWei) {
+        throw new Error(`Insufficient balance. You need ${nft.price} ETH but only have ${ethers.formatEther(balance!)} ETH.`);
       }
 
       // Simple marketplace: Send full amount to admin wallet (marketplace owner)
@@ -79,7 +101,7 @@ export const BuyNFT: React.FC = () => {
       const tx = await signer.sendTransaction({
         to: ADMIN_WALLET,
         value: priceInWei,
-        gasLimit: 25000 // Increased gas limit for safety
+        gasLimit: 100000 // Increased gas limit for reliability
       });
 
       toast({
@@ -159,7 +181,7 @@ export const BuyNFT: React.FC = () => {
               try {
                 // Transfer event signature for ERC721
                 const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-                const transferLog = mintReceipt.logs.find(log => log.topics[0] === transferEventSignature);
+                const transferLog = mintReceipt.logs.find((log: any) => log.topics[0] === transferEventSignature);
                 if (transferLog && transferLog.topics[3]) {
                   tokenId = parseInt(transferLog.topics[3], 16);
                   console.log('Extracted token ID:', tokenId);
@@ -200,11 +222,10 @@ export const BuyNFT: React.FC = () => {
         
         updateNFT(nft.id, { 
           status: 'sold',
-          owner: account,
-          transactionHash: tx.hash
+          owner: account
         });
 
-        // Add suggestion to import NFT to MetaMask
+        // Add suggestion to import NFT to MetaMask (optional functionality)
         const addToMetaMask = async () => {
           try {
             await window.ethereum.request({

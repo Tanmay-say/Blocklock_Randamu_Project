@@ -83,8 +83,12 @@ const Casino = () => {
 
   const initializeContract = async () => {
     try {
-      console.log('Initializing SlotMachine contract...');
-      console.log('Contract address:', import.meta.env.VITE_SLOT_MACHINE_ADDRESS);
+      console.log('🚀 Initializing SlotMachine contract...');
+      const contractAddress = import.meta.env.VITE_SLOT_MACHINE_ADDRESS || '0x87C730bf649e419Cc5810a14695AcDEB1f220FC1';
+      console.log('📍 Contract address:', contractAddress);
+      console.log('🔧 Environment variables loaded:', !!import.meta.env.VITE_SLOT_MACHINE_ADDRESS);
+      console.log('🔗 Provider available:', !!provider);
+      console.log('👤 Account:', account);
       
       const network = await provider.getNetwork();
       console.log('Provider network:', network);
@@ -686,7 +690,7 @@ const Casino = () => {
             wrongNetwork={wrongNetwork}
             contractInitialized={contractInitialized}
             userBalance={userBalance}
-            contractAddress="0x87C730bf649e419Cc5810a14695AcDEB1f220FC1"
+            contractAddress={import.meta.env.VITE_SLOT_MACHINE_ADDRESS || '0x87C730bf649e419Cc5810a14695AcDEB1f220FC1'}
           />
 
           <div className="grid lg:grid-cols-3 gap-8">
