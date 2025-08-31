@@ -344,11 +344,14 @@ contract SlotMachine is Ownable, ReentrancyGuard, Pausable {
     }
     
     function _startNewRound() private {
+        // Initialize the new round properly
         GameRound storage newRound = gameRounds[_currentRoundId];
         newRound.roundId = _currentRoundId;
         newRound.startTime = block.timestamp;
         newRound.endTime = block.timestamp + 1 hours;
         newRound.isActive = true;
+        // Clear any existing player data
+        delete newRound.playerAddresses;
         
         emit RoundStarted(_currentRoundId, block.timestamp);
     }
@@ -359,6 +362,10 @@ contract SlotMachine is Ownable, ReentrancyGuard, Pausable {
         round.endTime = block.timestamp;
         
         emit RoundEnded(_currentRoundId, block.timestamp);
+        
+        // Clean up current round data
+        delete round.playerAddresses;
+        
         _currentRoundId++;
     }
     
@@ -476,6 +483,20 @@ contract SlotMachine is Ownable, ReentrancyGuard, Pausable {
     
     function forceEndRound() external onlyOwner {
         _endCurrentRound();
+        _startNewRound();
+    }
+    
+    // Emergency function to reset round state
+    function resetRoundState() external onlyOwner {
+        // Reset current round to a clean state
+        GameRound storage round = gameRounds[_currentRoundId];
+        round.isActive = false;
+        round.endTime = block.timestamp;
+        
+        // Clear all player data
+        delete round.playerAddresses;
+        
+        // Start fresh round
         _startNewRound();
     }
 }

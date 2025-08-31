@@ -126,10 +126,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GenAINFT__factory>;
     getContractFactory(
-      name: "GenAINFTFixed",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.GenAINFTFixed__factory>;
-    getContractFactory(
       name: "GenAISubscription",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GenAISubscription__factory>;
@@ -145,10 +141,6 @@ declare module "hardhat/types/runtime" {
       name: "MockRandamuVRF",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockRandamuVRF__factory>;
-    getContractFactory(
-      name: "SimpleGenAI",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SimpleGenAI__factory>;
     getContractFactory(
       name: "SimpleGenAINFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -169,10 +161,6 @@ declare module "hardhat/types/runtime" {
       name: "WinnerSBT",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WinnerSBT__factory>;
-    getContractFactory(
-      name: "WorkingGenAINFT",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WorkingGenAINFT__factory>;
 
     getContractAt(
       name: "AccessControl",
@@ -315,11 +303,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.GenAINFT>;
     getContractAt(
-      name: "GenAINFTFixed",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.GenAINFTFixed>;
-    getContractAt(
       name: "GenAISubscription",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -339,11 +322,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.MockRandamuVRF>;
-    getContractAt(
-      name: "SimpleGenAI",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SimpleGenAI>;
     getContractAt(
       name: "SimpleGenAINFT",
       address: string | ethers.Addressable,
@@ -369,11 +347,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.WinnerSBT>;
-    getContractAt(
-      name: "WorkingGenAINFT",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.WorkingGenAINFT>;
 
     deployContract(
       name: "AccessControl",
@@ -488,10 +461,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.GenAINFT>;
     deployContract(
-      name: "GenAINFTFixed",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.GenAINFTFixed>;
-    deployContract(
       name: "GenAISubscription",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.GenAISubscription>;
@@ -507,10 +476,6 @@ declare module "hardhat/types/runtime" {
       name: "MockRandamuVRF",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockRandamuVRF>;
-    deployContract(
-      name: "SimpleGenAI",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SimpleGenAI>;
     deployContract(
       name: "SimpleGenAINFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -531,10 +496,6 @@ declare module "hardhat/types/runtime" {
       name: "WinnerSBT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WinnerSBT>;
-    deployContract(
-      name: "WorkingGenAINFT",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WorkingGenAINFT>;
 
     deployContract(
       name: "AccessControl",
@@ -677,11 +638,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.GenAINFT>;
     deployContract(
-      name: "GenAINFTFixed",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.GenAINFTFixed>;
-    deployContract(
       name: "GenAISubscription",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -701,11 +657,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockRandamuVRF>;
-    deployContract(
-      name: "SimpleGenAI",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SimpleGenAI>;
     deployContract(
       name: "SimpleGenAINFT",
       args: any[],
@@ -731,11 +682,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WinnerSBT>;
-    deployContract(
-      name: "WorkingGenAINFT",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WorkingGenAINFT>;
 
     // default types
     getContractFactory(

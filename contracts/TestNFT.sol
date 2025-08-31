@@ -2,22 +2,21 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title TestNFT
  * @dev Simple ERC-721 token for testing auctions
  */
-contract TestNFT is ERC721, Ownable {
+contract TestNFT is ERC721 {
     uint256 private _tokenIds = 0;
     
     // Mapping for token metadata
     mapping(uint256 => string) private _tokenURIs;
     
-    constructor() ERC721("TestNFT", "TNFT") Ownable(msg.sender) {}
+    constructor() ERC721("TestNFT", "TNFT") {}
     
     /**
-     * @dev Mint a new token
+     * @dev Mint a new token - anyone can mint for testing purposes
      * @param to The address to mint the token to
      * @param uri The URI for the token
      */

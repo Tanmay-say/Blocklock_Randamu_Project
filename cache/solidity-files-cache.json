@@ -1290,8 +1290,8 @@
       ]
     },
     "D:\\NGT market\\contracts\\SlotMachine.sol": {
-      "lastModificationDate": 1756563214881,
-      "contentHash": "29f3784bc3e88866f9ca2c5a1838d1d7",
+      "lastModificationDate": 1756632561142,
+      "contentHash": "547405cecd17040e1766468cf936c7a9",
       "sourceName": "contracts/SlotMachine.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1412,8 +1412,8 @@
       ]
     },
     "D:\\NGT market\\contracts\\TestNFT.sol": {
-      "lastModificationDate": 1756060806763,
-      "contentHash": "045c1b393b8c8bf78a55a0328c61d66a",
+      "lastModificationDate": 1756620675009,
+      "contentHash": "21bd2bf8ca70579b46c58b79b5543e0f",
       "sourceName": "contracts/TestNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1441,8 +1441,7 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol"
       ],
       "versionPragmas": [
         "^0.8.24"

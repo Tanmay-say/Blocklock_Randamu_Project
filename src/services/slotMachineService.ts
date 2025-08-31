@@ -73,7 +73,7 @@ export class SlotMachineService {
     if (contractAddress) {
       this.contractAddress = contractAddress;
     } else {
-      this.contractAddress = import.meta.env.VITE_SLOT_MACHINE_ADDRESS || '0x87C730bf649e419Cc5810a14695AcDEB1f220FC1';
+      this.contractAddress = import.meta.env.VITE_SLOT_MACHINE_ADDRESS || '0x9568cd176Eb3B5912e1e5c70bdc768C6e744D42b';
     }
   }
 

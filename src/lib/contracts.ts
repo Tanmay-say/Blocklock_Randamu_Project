@@ -49,7 +49,7 @@ export interface ContractAddresses {
 // Default addresses for Base Sepolia deployment - use environment variables when available
 export const LOCAL_CONTRACT_ADDRESSES: ContractAddresses = {
   auctionHouse: import.meta.env.VITE_AUCTION_HOUSE_ADDRESS || "0x6F8449Bb1E91970Ee39ECB3c71d7936e8e6d76Ba",
-  testNFT: import.meta.env.VITE_TEST_NFT_ADDRESS || "0x72ADEB4DE31E0C1D5Bd6b24c24C9ca11d6eD5705", 
+  testNFT: import.meta.env.VITE_TEST_NFT_ADDRESS || "0xb9e3daD67Fe425A382049Cb04720172F3F0A2c1a", 
   winnerSBT: import.meta.env.VITE_WINNER_SBT_ADDRESS || "0x12C2c5C8d2175Bc1dD80cD8A1b590C996B3f47d0",
   mockRandamuVRF: import.meta.env.VITE_MOCK_VRF_ADDRESS || "0x15F508eAE92bee6e8d27b61C4A129ECF094e9aa3"
 };

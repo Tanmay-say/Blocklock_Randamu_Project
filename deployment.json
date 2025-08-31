@@ -1,12 +1,13 @@
 {
   "SlotMachine": {
-    "address": "0x87C730bf649e419Cc5810a14695AcDEB1f220FC1",
+    "address": "0x9568cd176Eb3B5912e1e5c70bdc768C6e744D42b",
     "adminWallet": "0x286bd33A27079f28a4B4351a85Ad7f23A04BDdfC",
     "stakeAmount": "0.005",
     "maxPlayers": 10,
     "winPercentage": 10,
     "network": "base-sepolia",
-    "deployedAt": "2025-08-30T14:19:51.451Z",
-    "blockNumber": 30397651
+    "deployedAt": "2025-08-31T09:30:02.808Z",
+    "blockNumber": 30432157,
+    "status": "FIXED - Round management bug resolved"
   }
 }
