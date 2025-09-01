@@ -1290,8 +1290,8 @@
       ]
     },
     "D:\\NGT market\\contracts\\SlotMachine.sol": {
-      "lastModificationDate": 1756632561142,
-      "contentHash": "547405cecd17040e1766468cf936c7a9",
+      "lastModificationDate": 1756723313110,
+      "contentHash": "53086ec4946180a73f3a02d63a97a1ac",
       "sourceName": "contracts/SlotMachine.sol",
       "solcConfig": {
         "version": "0.8.24",
